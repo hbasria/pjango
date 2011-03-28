@@ -1,0 +1,21 @@
+FlatPage:  
+    actAs:
+        Timestampable:
+        I18n:
+            fields: [title, content]
+            actAs:
+                Sluggable:
+                    fields: [title]
+                     
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true                  
+        title: string(200)
+        content: string
+        status: string(35)
+        enable_comments: boolean      
+        template_name: string(100)  
+        registration_required: boolean

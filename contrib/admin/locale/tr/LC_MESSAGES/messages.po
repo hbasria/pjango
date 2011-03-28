@@ -1,0 +1,112 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Pjango\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Hasan Basri Ateş <hbasria@gmail.com>\n"
+"Language-Team: 4NET <language@4net.com.tr>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Turkish\n"
+"X-Poedit-Country: TURKEY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Turkish"
+msgstr "Türkçe"
+
+msgid "English"
+msgstr "İngilizce"
+
+msgid "Log Out"
+msgstr "Çıkış"
+
+msgid "Dashboard"
+msgstr "Kontrol Paneli"
+
+msgid "Flat Pages"
+msgstr "Düz Sayfalar"
+
+msgid "Add New"
+msgstr "Yeni Ekle"
+
+msgid "All"
+msgstr "Tümü"
+
+msgid "Published"
+msgstr "Yayınlananlar"
+
+msgid "Search"
+msgstr "Ara"
+
+msgid "Bulk Actions"
+msgstr "Toplu İşlemler"
+
+msgid "Move to Trash"
+msgstr "Çöpe Taşı"
+
+msgid "Apply"
+msgstr "Uygula"
+
+msgid "Add/Change"
+msgstr "Ekle/Değiştir"
+
+msgid "Publish"
+msgstr "Yayınla"
+
+msgid "title"
+msgstr "Başlık"
+
+msgid "slug"
+msgstr "slug"
+
+msgid "status"
+msgstr "Durum"
+
+msgid "template name"
+msgstr "Şablon Adı"
+
+msgid "Template Name"
+msgstr "Şablon Adı"
+
+msgid "created at"
+msgstr "Oluşturulma Tarihi"
+
+msgid "Status"
+msgstr "Durum"
+
+msgid "Draft"
+msgstr "Geçici"
+
+msgid "Page Attributes"
+msgstr "Sayfa özellikleri"
+
+msgid "Enable Comments"
+msgstr "Yorumları Etkinlenştir"
+
+msgid "Registration Required"
+msgstr "Kayıt Gerekli"
+
+msgid "Edit"
+msgstr "Düzenle"
+
+msgid "Enter title here"
+msgstr "Buraya başlık girin"
+
+msgid "Bulk Actions"
+msgstr "Çoklu İşlemler"
+
+msgid "Active"
+msgstr "Aktif"
+             
+msgid "Translation__tr__title"
+msgstr "Başlık"
+
+msgid ""
+msgstr ""
+
+
+
+msgid ""
+msgstr ""

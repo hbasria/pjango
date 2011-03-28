@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<div class="wrap"> 
+	<div id="icon-options-general" class="icon32"><br /></div> 
+	<h2>{% trans 'Products' %} 
+		<a href="/{{ SITE_URL }}admin/products/add/" class="button add-new-h2">{% trans 'Add New' %}</a></h2> 
+ 
+<div class="clear"></div>	
+	
+    <table class="widefat fixed" cellspacing="0"> 
+        <thead> 
+            <tr> 
+			    <th scope="col" id="cb" class="manage-column check-column" style=""><input type="checkbox" /></th> 
+			    <th scope="col" id="name" class="manage-column" style="">{% trans 'Name'%}</th>
+			    <th scope="col" id="description" class="manage-column" style="">{% trans 'Description'%}</th>  
+			    <th scope="col" id="price" class="manage-column" style="">{% trans 'Price'%}</th> 
+			    <th scope="col" id="price" class="manage-column" style="">{% trans 'Discounted Price'%}</th> 
+			</tr> 
+        </thead> 
+        <tfoot> 
+		    <tr> 
+			    <th scope="col"  class="manage-column check-column" style=""><input type="checkbox" /></th> 
+			    <th scope="col"  class="manage-column" style="">{% trans 'Name'%}</th>
+			    <th scope="col"  class="manage-column" style="">{% trans 'Description'%}</th>  
+			    <th scope="col"  class="manage-column" style="">{% trans 'Price'%}</th> 
+			    <th scope="col"  class="manage-column" style="">{% trans 'Discounted Price'%}</th> 
+		    </tr> 
+        </tfoot> 
+        <tbody> 
+            {% for product_item in products %}
+            <tr id="link-1" valign="middle"  class="alternate">
+                <th scope="row" class="check-column"><input type="checkbox" name="linkcheck[]" value="1" /></th>
+                <td class="column-name">
+                    <strong><a class='row-title' href='/{{ SITE_URL }}admin/products/{{ product_item.id }}/' title='Edit'>&nbsp;{{ product_item.name }}</a></strong><br />
+                    <div class="row-actions">
+                        <span class='edit'><a href="/{{ SITE_URL }}admin/products/{{ product_item.id }}/">Edit</a> | </span>
+                        <span class='delete'><a class='submitdelete' href='/{{ SITE_URL }}admin/products/{{ product_item.id }}/delete/' onclick="if ( confirm('Bu kaydı silmek istediğinizden eminmisiniz.') ) { return true;}return false;">Delete</a></span>
+                    </div>
+                </td>
+                <td>{{ product_item.description }}</td>
+                <td>{{ product_item.price }}</td>
+                <td>{{ product_item.discounted_price }}</td>                
+            </tr> 
+            {% endfor %}
+        </tbody> 
+    </table>	
+ 
+
+ 
+</div> 
+		
+{% endblock %}   

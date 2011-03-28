@@ -1,0 +1,10 @@
+ContentType:
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true                  
+        name: string(100)
+        app_label: string(100)
+        model: string(100)

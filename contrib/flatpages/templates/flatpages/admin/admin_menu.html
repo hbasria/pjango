@@ -1,0 +1,12 @@
+<li class="wp-has-submenu {% if admin_menu_current == 'menu_flatpages' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-page menu-top-first" id="menu-flatpages"> 
+    <div class='wp-menu-image'><a href='{{ SITE_URL }}/admin/fp/'><br /></a></div>
+    <div class="wp-menu-toggle"><br /></div>
+    <a href='{{ SITE_URL }}/admin/fp/' class="wp-has-submenu {% if admin_menu_current == 'menu_flatpages' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-post menu-top-first">{% trans 'Flat Pages' %}</a> 
+    <div class='wp-submenu'>
+        <div class='wp-submenu-head'>{% trans 'Flat Pages' %}</div>
+        <ul>
+            <li class="wp-first-item {% if admin_submenu_current == 'submenu_pages' %} current {% endif %}"><a href='{{ SITE_URL }}/admin/fp/' class="wp-first-item {% if admin_submenu_current == 'submenu_pages' %} current {% endif %}" tabindex="1">{% trans 'Pages' %}</a></li>
+            <li class="{% if admin_submenu_current == 'submenu_addchange' %} current {% endif %}"><a href='{{ SITE_URL }}/admin/fp/add/' class="{% if admin_submenu_current == 'submenu_addchange' %} current {% endif %}">{% trans 'Add New' %}</a></li>
+        </ul>
+    </div>
+</li>

@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<div class="wrap"> 
+	<div id="icon-options-general" class="icon32"><br /></div> 
+	<h2>Genel Ayarlar</h2> 
+ 
+    <div class="clear"></div>  
+    
+    <form method="post" action=""> 
+        <table class="form-table">
+            {% for settings_item in settings %}
+            <tr valign="top">
+                <th scope="row"><label for="settings_{{ settings_item.id }}">{{ settings_item.description }}</label></th>
+                <td><input name="Settings[{{ settings_item.id }}]" type="text" id="settings_{{ settings_item.id }}" value="{{ settings_item.value }}" class="regular-text" /></td>
+            </tr>
+            {% endfor %}
+        </table>
+        
+        <p class="submit"> 
+            <input type="submit" name="Submit" class="button-primary" value="Değişiklikleri Kaydet" /> 
+        </p> 
+    </form>      
+    
+
+
+ 
+
+ 
+</div> 
+        
+{% endblock %}   

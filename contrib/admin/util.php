@@ -64,7 +64,7 @@ class ChangeList {
     var $paginator_display = '';
     
     //def __init__(self, request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields, list_select_related, list_per_page, list_editable, model_admin):
-    function __construct($q, $list_display=false, $list_display_links=false, $list_filter=false, $date_hierarchy=false, $search_fields=false, $list_per_page=false) {
+    function __construct($q, $list_display=false, $list_display_links=false, $list_filter=false, $date_hierarchy=false, $search_fields=false, $list_per_page=false, $row_actions=false) {
         global $site;
     	
     	
@@ -110,6 +110,7 @@ class ChangeList {
     	if ($list_filter) $this->list_filter = $list_filter;
     	if ($date_hierarchy) $this->date_hierarchy = $date_hierarchy;
     	if ($search_fields) $this->search_fields = $search_fields;
+    	if ($row_actions) $this->row_actions = $row_actions;
     	
     	
     	

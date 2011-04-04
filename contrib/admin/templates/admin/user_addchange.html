@@ -1,0 +1,152 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery-validation/jquery.validate.min.js"></script>
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery-validation/localization/messages_{{ LANGUAGE_CODE }}.js"></script>
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/password-strength-meter.js"></script>
+<style>
+<!--
+label.error {
+    display: inline-block;
+    line-height: 1.8;
+    vertical-align: top;
+    cursor: hand;
+    margin-left: 103px;
+}
+-->
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="wrap">
+    <div id="icon-users" class="icon32"><br></div>
+    <h2 id="add-new-user">{% trans "Add New User" %}</h2>
+
+    <div id="ajax-response"></div>
+
+    <form action="" method="post" name="createuser" id="createuser" class="add:users: validate">
+    {% if user_obj %}<input type="hidden" name="id" value="{{ user_obj.id }}" /> {% endif %}
+    
+    <table class="form-table"><tbody>
+        <tr class="form-field form-required">
+            <th scope="row"><label for="username">{% trans "Username" %} <span class="description">({% trans "required" %})</span></label></th>
+            <td><input name="username" type="text" id="username" value="{{ user_obj.username }}" class="required"></td>
+        </tr>
+	    <tr class="form-field form-required">
+	        <th scope="row"><label for="email">{% trans "E-mail" %} <span class="description">({% trans "required" %})</span></label></th>
+	        <td><input name="email" type="text" id="email" value="{{ user_obj.email }}" class="required"></td>
+	    </tr>
+	    <tr class="form-field">
+	        <th scope="row"><label for="displayname">{% trans "Display Name" %} </label></th>
+	        <td><input name="displayname" type="text" id="displayname" value="{{ user_obj.displayname }}"></td>
+	    </tr>
+        <tr class="form-field form-required">
+            <th scope="row"><label for="pass1">{% trans "Password" %} <span class="description">({% trans "required)" %}</span></label></th>
+            <td><input name="pass1" type="password" id="pass1" autocomplete="off">
+	            <br>
+	            <input name="pass2" type="password" id="pass2" autocomplete="off">
+	            <br>
+	            <div id="pass-strength-result" style="display: block; "></div>
+	            <p class="description indicator-hint">{% trans "Hint" %}: {% trans "The password should be at least 5 characters long. To make it stronger, use upper and lower case letters, numbers and symbols like" %} ! " ? $ % ^ &amp; ).</p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">{% trans "Is Staff" %}</th>
+            <td><label for="is_staff"><input name="is_staff" type="checkbox" id="is_staff" value="1" {% if user_obj.is_staff %} checked="checked"{% endif %}></label></td>
+        </tr>   
+        <tr>
+            <th scope="row">{% trans "Is Active" %}</th>
+            <td><label for="is_active"><input name="is_active" type="checkbox" id="is_active" value="1" {% if user_obj.is_active %} checked="checked"{% endif %}></label></td>
+        </tr>        
+        
+    </tbody></table>
+    
+    <p class="submit"><input type="submit" name="save" id="save" class="button-primary" value="{% if user_obj %}{% trans "Update User" %}{% else %}{% trans "Add New User" %}{% endif %}"></p>
+    </form>
+</div>          
+
+<script type="text/javascript">
+
+var pwsL10n = {
+	    empty: "",
+	    short: "Çok Zayıf",
+	    bad: "Zayıf",
+	    good: "Orta",
+	    strong: "Güçlü",
+	    mismatch: "Uyumsuz"
+};
+
+function check_pass_strength() {
+    var pass1 = $('#pass1').val(), user = $('#username').val(), pass2 = $('#pass2').val(), strength;
+
+    $('#pass-strength-result').removeClass('short bad good strong');
+    if ( ! pass1 ) {
+        $('#pass-strength-result').html( pwsL10n.empty );
+        return;
+    }
+
+    strength = passwordStrength(pass1, user, pass2);
+
+    switch ( strength ) {
+        case 2:
+            $('#pass-strength-result').addClass('bad').html( pwsL10n['bad'] );
+            break;
+        case 3:
+            $('#pass-strength-result').addClass('good').html( pwsL10n['good'] );
+            break;
+        case 4:
+            $('#pass-strength-result').addClass('strong').html( pwsL10n['strong'] );
+            break;
+        case 5:
+            $('#pass-strength-result').addClass('short').html( pwsL10n['mismatch'] );
+            break;
+        default:
+            $('#pass-strength-result').addClass('short').html( pwsL10n['short'] );
+    }
+}
+
+$(document).ready( function() {
+	$('#pass1').val('').keyup( check_pass_strength );
+    $('#pass2').val('').keyup( check_pass_strength );
+    $('#pass-strength-result').show();
+    
+    $("#createuser").validate({
+        rules: {{% if not user_obj %}
+        	pass1: {required: true, minlength: 5},
+            pass2: {required: true, minlength: 5, equalTo: "#pass1"},{% endif %}
+            email: {
+                required: true,
+                email: true,
+            }
+        }
+    });
+    
+});
+
+
+
+
+
+
+</script>              
+{% endblock %}   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     

@@ -103,8 +103,65 @@ msgstr "Aktif"
 msgid "Translation__tr__title"
 msgstr "Başlık"
 
+msgid "Users"
+msgstr "Kullanıcılar"
+
+msgid "Username"
+msgstr "Kullanıcı Adı"
+
+msgid "Displayname"
+msgstr "Görünür Ad"
+
+msgid "Email"
+msgstr "Eposta"
+
+msgid "Is Active"
+msgstr "Aktif Mi?"
+
+msgid "Is Superuser"
+msgstr "Süper Kullanıcı Mı?"
+
+msgid "Is Staff"
+msgstr "Yönetici Mi"
+
+msgid "Last Login"
+msgstr "Son Giriş"
+
+msgid "Date Joined"
+msgstr "Eklenme Tarihi"
+
+msgid "required"
+msgstr "gerekli"
+
+msgid "Display Name"
+msgstr "Görünür Ad"
+
+msgid "Password"
+msgstr "Şifre"
+
+msgid "Add New User"
+msgstr "Yeni Kullanıcı Ekle"
+
+msgid "Hint"
+msgstr "İpucu"
+
+msgid "The password should be at least 5 characters long. To make it stronger, use upper and lower case letters, numbers and symbols like"
+msgstr "Şifre en az 5 karakter uzunluğunda olmalıdır. Şifreyi daha güçlü yapmak için büyük küçük harfler ve sembolleri kullanın örnek: "
+
 msgid ""
 msgstr ""
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
+
+
+
 
 
 

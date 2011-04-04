@@ -137,7 +137,7 @@ if(is_file(APPLICATION_PATH.'/cache/lang_'.$GLOBALS['LANGUAGE_CODE'].'.cache')){
 	file_put_contents(APPLICATION_PATH.'/cache/lang_'.$GLOBALS['LANGUAGE_CODE'].'.cache', serialize($GLOBALS['LANG']));   
 }
 
-
+/*
 ## veritabanındaki ayarları yükle
 if (Doctrine::getTable('Settings')){
 	$q = Doctrine_Query::create()
@@ -148,7 +148,7 @@ if (Doctrine::getTable('Settings')){
 	foreach ($results as $row) {
 	    $GLOBALS['SETTINGS'][$row['name']]= $row['value'];
 	}
-}
+}*/
 
 
 
@@ -180,11 +180,11 @@ $requestUri = implode('/', $parts);
 
 
 
-$match = preg_match('/'.str_replace('/', '\/', '/admin/').'/', $requestUri, $params);
+$match = preg_match('/'.str_replace('/', '\/', 'admin/').'/', $requestUri, $params);
 
 //admin sayfaları için login kontrolü
 if($match){
-	if (isset($_SESSION['user']['is_superuser']) && $_SESSION['user']['is_superuser'] == 1){
+	if (isset($_SESSION['user']['is_staff']) && $_SESSION['user']['is_staff'] == 1){
 		//devam
 	}else {
 		echo '<meta http-equiv="Refresh" content="0;URL='.$GLOBALS['SITE_URL'].$GLOBALS['SETTINGS']['LOGIN_URL'].'">';

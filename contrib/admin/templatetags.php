@@ -34,7 +34,9 @@ class Result_List_Tag extends H2o_Node {
         $resultHeaders = array();
         
         foreach ($cl->list_display as $field_name) {
-            $text = pjango_gettext($field_name);
+        	$text = str_replace('_', ' ', $field_name);
+        	$text = ucwords(strtolower($text));        	
+            $text = pjango_gettext($text);
             $resultHeaders[] = array(
                'text' => $text,
                'sortable' => false,

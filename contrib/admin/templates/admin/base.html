@@ -77,10 +77,17 @@
              
             <li class="wp-menu-separator"><a class="separator" href="#"><br /></a></li>
             
-
-            
-
-
+            <li class="wp-has-submenu {% if current_admin_menu == 'users' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-users  menu-top-first" id="menu-users">
+                <div class="wp-menu-image"><a href="{{ SITE_URL }}/admin/users/&quot;"><br/></a></div>
+                <div class="wp-menu-toggle"><br/></div>
+                <a href="{{ SITE_URL }}/admin/users/" class=" wp-has-submenu {% if current_admin_menu == 'users' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-users  menu-top-first">{% trans "Users" %}</a>
+                <div class="wp-submenu" style="">
+                    <div class="wp-submenu-head">{% trans "Users" %}</div>
+                    <ul>
+                        <li class="wp-first-item {% if current_admin_submenu == 'users' %} current {% endif %}"><a href="{{ SITE_URL }}/admin/users/" class="{% if current_admin_submenu == 'users' %} current {% endif %} wp-first-item">{% trans "Users" %}</a></li>
+                    </ul>
+                </div>
+            </li>            
 
             <li class="wp-has-submenu {% if admin_menu_current == 'menu_settings' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-settings menu-top-last" id="menu-settings"> 
                 <div class='wp-menu-image'><a href='{{ SITE_URL }}/admin/settings/'><br /></a></div>

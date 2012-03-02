@@ -1,174 +1,52 @@
-PhoneType:   
+Permission:
+    tableName: auth_permission
     columns:
         id:
             type: integer
             primary: true  
             notnull: true
-            autoincrement: true
-            
-        name: string(35)             
-
-
-Phone:   
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true
-            
-        phone: string(35)       
-                    
-        phone_type_id: integer
-
+            autoincrement: true   
+        name:  string(50)
+        codename:  string(100)        
+        content_type_id: integer
+                
     relations:
-        PhoneType:
-            foreignType: one           
-                  
-
-EmailType:   
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true
-            
-        name: string(35)             
-
-
-Email:   
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true
-            
-        email: string(100)       
-                    
-        email_type_id: integer
- 
-    relations:
-        EmailType:
-            foreignType: one
-            
-AddressType:   
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true
-            
-        name: string(35)             
-
-
-Address:   
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true
-
-        name: string(100)               
-        address: string(100)      
-                    
-        address_type_id: integer
- 
-    relations:
-        AddressType:
-            foreignType: one            
-
-AddressMeta:  
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true 
-        address_id: integer
-        meta_key: string(255)
-        meta_value: string               
-    relations:
-        Address:
-            local: address_id
+        ContentType:
+            local: content_type_id
             foreign: id        
-        
-Contact:   
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true
-
-        first_name: string(100)
-        last_name: string(100) 
-    relations:
-        Phones:
-            class: Phone
-            local: contact_id
-            foreign: phone_id
-            refClass: ContactPhone
-        Emails:
-            class: Email
-            local: contact_id
-            foreign: email_id
-            refClass: ContactEmail
-        Addresses:
-            class: Email
-            local: contact_id
-            foreign: address_id
-            refClass: ContactAddress            
-
-
-ContactMeta:  
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true 
-        contact_id: integer
-        meta_key: string(255)
-        meta_value: string               
-    relations:
-        Contact:
-            local: contact_id
-            foreign: id      
-
-
-ContactPhone:
-    columns:
-        contact_id:
-            type: integer
-            primary: true
-        phone_id:
-            type: integer
-            primary: true
             
-ContactEmail:
+Group:
+    tableName: auth_group            
     columns:
-        contact_id:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true   
+        name:  string(100)
+    relations:
+        Permissions:
+            foreignAlias: Groups
+            class: Permission
+            refClass: GroupPermission
+
+GroupPermission:
+    tableName: auth_group_permissions
+    columns:
+        group_id:
             type: integer
             primary: true
-        email_id:
-            type: integer
-            primary: true            
-
-ContactAddress:
-    columns:
-        contact_id:
+        permission_id:
             type: integer
             primary: true
-        address_id:
-            type: integer
-            primary: true    
-
-
+    relations:
+        Group:
+            foreignAlias: GroupPermissions
+        Permission:
+            foreignAlias: PermissionGroups
+            
 User:  
+    tableName: auth_user
     columns:
         id:
             type: integer
@@ -187,12 +65,49 @@ User:
         is_active: boolean
         is_superuser: boolean
         last_login: timestamp
-        date_joined: date
-        
+        date_joined: date    
         contact_id: integer
-                
+        reference_user_id: integer      
     relations:
-        Contact:
-            local: contact_id
-            foreign: id
-                                    
+        Groups:
+            class: Group
+            refClass: UserGroup
+            foreignAlias: Users
+        Permissions:
+            class: Permission
+            refClass: UserPermission
+            foreignAlias: Users     
+        ReferenceUser:
+            local: reference_user_id
+            foreign: id                       
+        
+                                
+UserGroup:
+    tableName: auth_user_groups
+    columns:
+        user_id:
+            type: integer
+            primary: true
+        group_id:
+            type: integer
+            primary: true
+    relations:
+        User:
+            foreignAlias: UserGroups
+        Group:
+            foreignAlias: GroupUsers           
+                
+UserPermission:
+    tableName: auth_user_permissions
+    columns:
+        user_id:
+            type: integer
+            primary: true
+        permission_id:
+            type: integer
+            primary: true
+    relations:
+        User:
+            foreignAlias: UserPermissions
+        Permission:
+            foreignAlias: PermissionUsers                                          

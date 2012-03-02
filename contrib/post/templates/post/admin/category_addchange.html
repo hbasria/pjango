@@ -1,0 +1,30 @@
+{% extends "admin/layout.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery.slugify.js"></script>
+{% endblock %}
+
+{% block content %}
+<form id="addChangeForm" name="addChangeForm" action="" method="post">
+    <fieldset>
+        <legend>{% trans "Category information" %}</legend>
+        
+        <ul class="addchange_form"> 
+            {{ addchange_form }} 
+        </ul>
+    </fieldset>
+
+    <p>&nbsp;</p> 
+    <p>&nbsp;</p>
+    
+     <a href="javascript:void(0)" onclick="$('#addChangeForm').submit();" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">Tamam</span></a>
+     <a href="{{ ADMIN_SITE_URL }}/{{ taxonomy }}/categories/" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">İptal</span></a>
+</form>
+
+<script type="text/javascript">        
+    $(document).ready(function(){
+        $('#id_slug').slugify('#id_name');
+    });
+</script>  
+{% endblock %}

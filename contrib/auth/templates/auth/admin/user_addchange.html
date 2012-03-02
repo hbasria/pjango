@@ -1,0 +1,60 @@
+{% extends "admin/layout.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+<link type="text/css" href="{{ ADMIN_MEDIA_URL }}/js/multiselect/css/ui.multiselect.css" rel="stylesheet" />
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/multiselect/js/ui.multiselect.js"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+    <li>{% trans "Users" %}</li>
+    {% if change_obj %}
+        <li>{% trans "Change" %}</li>
+    {% else %}
+        <li>{% trans "Add New" %}</li>
+    {% endif %}
+{% endblock %}
+
+
+{% block content %}
+<form id="addChangeForm" name="addChangeForm" action="" method="post">
+    <h2>{% trans "User" %}</h2>
+    <ul> 
+        {{ addchange_form }}       
+    </ul>        
+
+<div>
+    <h2>{% trans "User Groups" %}</h2>
+    <select id="user_groups" class="multiselect" multiple="multiple" name="groups[]" style="width:400px;height:200px">
+        {% for group_item in groups %}
+            <option value="{{ group_item.id }}" {% for user_group_item in user_groups %}{% if user_group_item.group_id == group_item.id %} selected="selected"{% endif %}{% endfor %}>{{ group_item.name }}</option>
+        {% endfor %}       
+    </select>
+</div>
+<br/><br/>
+<div>
+    <h2>{% trans "User Permissions" %}</h2>
+    <select id="user_permissions" class="multiselect" multiple="multiple" name="permissions[]" style="width:400px;height:200px">
+        {% for permission_item in permissions %}
+            <option value="{{ permission_item.id }}" {% for user_permission_item in user_permissions %}{% if user_permission_item.permission_id == permission_item.id %} selected="selected"{% endif %}{% endfor %}>{{ permission_item.name }}</option>
+        {% endfor %}       
+    </select>
+</div>
+
+<p>&nbsp;</p>
+<p align="right">
+		<a href="javascript:void(0)" onclick="$('#addChangeForm').submit();" class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">{% trans "Save" %}</span></a>
+		<a href="" class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">{% trans "Delete" %}</span></a>
+		<a href="{{ SITE_URL }}/admin/user/" class="ui-button ui-button-text-only ui-widget ui-state-default ui-corner-all"><span class="ui-button-text">{% trans "Cancel" %}</span></a>
+</p>
+
+</form>
+
+
+<script type="text/javascript">
+    $(function(){
+        //$.localise('ui-multiselect', {/*language: 'en',*/ path: 'js/locale/'});
+        $(".multiselect").multiselect();
+    });
+</script>
+{% endblock %}   

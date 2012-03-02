@@ -1,0 +1,196 @@
+{% extends "admin/layout.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    {% for extrahead_item in extraheads %}
+        {{ extrahead_item }}
+    {% endfor %}
+    
+    <link rel="stylesheet"  href="{{ ADMIN_MEDIA_URL }}/css/players.css" type="text/css" >
+	<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/tinymce/tiny_mce.js"></script>
+	<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/tinymce/tiny_mce_config.js"></script>
+	<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery.slugify.js"></script>
+	<style> 
+	    #gallery { float: left; width: 65%; min-height: 12em; } * html #gallery { height: 12em; } /* IE6 */
+	    .gallery.custom-state-active { background: #eee; }
+	    .gallery li { float: left; width: 96px; padding: 0.4em; margin: 0 0.4em 0.4em 0; text-align: center; }
+	    .gallery li h5 { margin: 0 0 0.4em; cursor: move; }
+	    .gallery li a { float: right; }
+	    .gallery li a.ui-icon-zoomin { float: left; }
+	    .gallery li img { width: 100%; cursor: move; }
+	</style>
+{% endblock %}
+
+{% block content %}
+<p>&nbsp;</p>
+
+<form id="addChangeForm" name="addChangeForm" action="" method="post">
+	<div class="left_column">
+	    <div class="shadedPanel">
+		    <ul class="addchange_form"> 
+		        {{ addchange_form }}
+		    </ul>
+		    
+		    <div class="clear"></div> 
+		    <a href="javascript:void(0)" onclick="mcImageManager.open('','','','addProductImage');">Resim Ekle</a>
+		    <div class="clear"></div>       
+		    
+		    <div class="ui-widget ui-helper-clearfix"> 
+		        <ul id="gallery" class="gallery ui-helper-reset ui-helper-clearfix"> 
+		        
+		        </ul> 
+		    </div>        
+		    
+		    <p>&nbsp;</p>
+		    <p align="right">
+		        <a href="javascript:void(0)" onclick="$('#addChangeForm').submit();" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">{% trans "Ok" %}</span></a>
+		        <a href="{{ SITE_URL }}/admin/{{ taxonomy }}/" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">{% trans "Cancel" %}</span></a>
+		    </p>    
+		</div>
+	</div>
+	
+    {% meta_data addchange_obj as addchange_meta_data %}
+    <div class="right_column">
+        <div class="shadedPanel">   
+            <h3>{% trans "Meta Values" %}</h3>
+            <div class="shadedPanel_element">               
+                <h3>{% trans "Meta Title" %}</h3>                
+                <p><input type="text" name="meta_title" value="{{ addchange_meta_data.meta_title }}" size="40"/></p>
+            </div>
+            <div class="shadedPanel_element">               
+                <h3>{% trans "Meta Description" %}</h3>                
+                <p><input type="text" name="meta_description" value="{{ addchange_meta_data.meta_description }}" size="40"/></p>
+            </div>
+            <div class="shadedPanel_element">               
+                <h3>{% trans "Meta Keywords" %}</h3>    
+                <p><input type="text" name="meta_keywords" value="{{ addchange_meta_data.meta_keywords }}" size="40"/></p>            
+            </div>
+       
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div> 
+        </div>
+    </div>  	
+</form>  
+
+<script type="text/javascript">     
+function set_product_images() {
+    var images = new Array();
+    $("ul.gallery > li").each(function (i) {
+        images.push($(this).find('img').attr('src'));
+    });
+    
+    $('#id_images').val(images.join("|"));
+}
+
+function addProductImage(url, data) {
+    var $gallery = $( "#gallery" );
+    
+    var galleryItem = '<li class="ui-widget-content ui-corner-tr">';
+    galleryItem += '<h5 class="ui-widget-header">Image</h5>';
+    galleryItem += '<img src="'+url+'" alt="Product Image" width="96" height="72" />';
+    galleryItem += '<a href="'+url+'" title="View larger image" class="ui-icon ui-icon-zoomin">View larger</a>';
+    galleryItem += '<a href="#" title="Delete this image" class="ui-icon ui-icon-trash">Delete image</a> ';
+    galleryItem += '</li>';
+    
+    $(galleryItem).appendTo($gallery);
+    
+    $( "ul.gallery > li" ).click(function( event ) {
+        var $item = $( this ),
+            $target = $( event.target );
+
+        if ( $target.is( "a.ui-icon-trash" ) ) {
+            deleteImage( $item );
+        } else if ( $target.is( "a.ui-icon-zoomin" ) ) {
+            viewLargerImage( $target );
+        }
+
+        return false;
+    });    
+    
+    set_product_images();
+}
+
+function viewLargerImage( $link ) {
+    var src = $link.attr( "href" ),
+        title = $link.siblings( "img" ).attr( "alt" ),
+        $modal = $( "img[alt$='" + src + "']" );
+    
+    if ( $modal.length ) {
+        $modal.dialog( "open" );
+    } else {
+        var img = $( "<img alt='" + src + "' width='384' height='288' style='display: none; padding: 8px;' />" )
+            .attr( "src", src ).appendTo( "body" );
+        setTimeout(function() {
+            img.dialog({
+                title: title,
+                width: 400,
+                height: 300,
+                modal: true
+            });
+        }, 1 );
+    }
+    
+}
+
+function deleteImage( $item ) {
+    $item.fadeOut(function() {
+        $item.remove();
+        set_product_images();
+    });
+    
+    
+}
+
+	$(document).ready(function(){
+		$('#id_slug').slugify('#id_title');
+		
+	    var product_images = $('#id_images').val();
+	    var product_imagesArr = product_images.split('|');
+	    
+	    for(i=0;i<product_imagesArr.length;i++){
+	        if(product_imagesArr[i].length>0){
+	         addProductImage(product_imagesArr[i], false);
+	        }
+	    }    
+	    
+	    // resolve the icons behavior with event delegation
+	    $( "ul.gallery > li" ).click(function( event ) {
+	        var $item = $( this ),
+	            $target = $( event.target );
+
+	        if ( $target.is( "a.ui-icon-trash" ) ) {
+	            deleteImage( $item );
+	        } else if ( $target.is( "a.ui-icon-zoomin" ) ) {
+	            viewLargerImage( $target );
+	        } else if ( $target.is( "a.ui-icon-refresh" ) ) {
+	            //recycleImage( $item );
+	        }
+
+	        return false;
+	    });
+	    
+	    $( "#gallery" ).sortable();		
+	});
+</script>                  
+                     
+{% endblock %}   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     

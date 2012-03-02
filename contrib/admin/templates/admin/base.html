@@ -1,143 +1,106 @@
-{% load i18n %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml"> 
-<head> 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
-    <title>{% block title %} {% endblock %} &lsaquo; Pjango Admin</title> 
-
-    <link rel='stylesheet' href='{{ ADMIN_MEDIA_URL }}/css/global.dev.css' type='text/css' media='all' />
-    <link rel='stylesheet' href='{{ ADMIN_MEDIA_URL }}/css/wp-admin.dev.css' type='text/css' media='all' /> 
-    <link rel='stylesheet' href='{{ ADMIN_MEDIA_URL }}/css/colors-fresh.dev.css' type='text/css' media='all' /> 
-    <link type="text/css" href="{{ ADMIN_MEDIA_URL }}/js/jquery-ui/css/ui-lightness/jquery-ui-1.8.11.custom.css" rel="stylesheet" />
-	<!--[if lte IE 7]>
-	<link rel='stylesheet' id='ie-css'  href='{{ ADMIN_MEDIA_URL }}/css/ie.css' type='text/css' media='all' />
-	<![endif]--> 
+{% load 'i18n' %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="tr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Language" content="tr">
+    <title>{% block title %} {% endblock %} &lsaquo; {P}jango Admin</title>
     
-    {% block extrastyle %}{% endblock %}
+    <link rel="stylesheet" type="text/css" href="{{ ADMIN_MEDIA_URL }}/css/base.css"/>
+    
+    <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery-1.5.2.min.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{{ ADMIN_MEDIA_URL }}/js/jquery-ui/css/flick/jquery-ui-1.8.13.custom.css" media="screen"/>    
+    <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery-ui/js/jquery-ui-1.8.11.custom.min.js"></script>
+    <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/utils.js"></script>
     
     <script type="text/javascript">
-        var SITE_URL = '{{ SITE_URL }}';        
-    </script>  
+    var SITE_URL = '{{ SITE_URL }}';
+    var MEDIA_URL = '{{ MEDIA_URL }}';
+    var ADMIN_MEDIA_URL = '{{ ADMIN_MEDIA_URL }}';
+    </script>
     
-    <script type='text/javascript' src='{{ ADMIN_MEDIA_URL }}/js/jquery-1.4.2.min.js'></script>
-    <script type='text/javascript' src='{{ ADMIN_MEDIA_URL }}/js/jquery.dump.js'></script>
-    
-    <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery-ui/js/jquery-ui-1.8.11.custom.min.js"></script>
-    
-    <script type='text/javascript' src='{{ ADMIN_MEDIA_URL }}/js/common.js'></script>  
-    <script type='text/javascript' src='{{ ADMIN_MEDIA_URL }}/js/utils.js'></script>  
-    {% block extrahead %}{% endblock %}
-</head> 
-<body class="wp-admin js  options-general-php"> 
+    {% block extrahead %}{% endblock %}    
+</head>
+<body class="hasInterface hasGradient hasSidebar ">
 
-<div id="wpwrap"> 
-    <div id="wpcontent"> 
-        <div id="wphead"> 
-			<h1 id="site-heading" > 
-			    <a href="{{ SITE_URL }}/" title="Visit Site"> 
-			        <span id="site-title">{P}jango Admin</span> 
-			    </a> 
-			</h1> 
- 
- 
-            <div id="wphead-info"> 
-                <div id="user_info"> 
-                    ({{ LANGUAGE_CODE }}) 
-                    <a href="?lng=tr">{% trans 'Turkish' %}</a>&nbsp;|&nbsp;
-                    <a href="?lng=en">{% trans 'English' %}</a>&nbsp;
-                    {% trans 'Hello' %} <a href="" title="">{{ user.username }}</a> | 
-                    <a href="{{ SITE_URL }}/auth/logout/" title="{% trans 'Log Out' %}">{% trans 'Log Out' %}</a> 
-                </div>
-                
- 
-            </div> 
-        </div> 
- 
-        <div id="wpbody"> 
- 
-        <ul id="adminmenu"> 
-            <li class="wp-first-item wp-has-submenu menu-top menu-top-first menu-icon-dashboard menu-top-last" id="menu-dashboard"> 
-                <div class='wp-menu-image'><a href='{{ SITE_URL }}/shoppingcart/admin/'><br /></a></div>
-                <div class="wp-menu-toggle"><br /></div>
-                <a href='{{ SITE_URL }}/admin/' class="wp-first-item wp-has-submenu menu-top menu-top-first menu-icon-dashboard menu-top-last" tabindex="1">{% trans 'Dashboard' %}
-                <img src="{{ ADMIN_MEDIA_URL }}/img/ajax_load_2.gif" alt="loading.." id="ajax-loader" width="16" height="16" style="visibility:hidden"/>
-                </a> 
-                
-                <div class='wp-submenu'>
-                    <div class='wp-submenu-head'>{% trans 'Dashboard' %}</div>
-                    <ul>
-                        <li class="wp-first-item"><a href='' class="wp-first-item" tabindex="1">{% trans 'Dashboard' %}</a></li>                       
-                    </ul>
-                </div>
-            </li> 
-            
-            <li class="wp-menu-separator"><a class="separator" href="#"><br /></a></li>   
-            
-            {% get_admin_menu current_admin_menu current_admin_submenu %}         
-             
-            <li class="wp-menu-separator"><a class="separator" href="#"><br /></a></li>
-            
-            <li class="wp-has-submenu {% if current_admin_menu == 'users' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-users  menu-top-first" id="menu-users">
-                <div class="wp-menu-image"><a href="{{ SITE_URL }}/admin/users/&quot;"><br/></a></div>
-                <div class="wp-menu-toggle"><br/></div>
-                <a href="{{ SITE_URL }}/admin/users/" class=" wp-has-submenu {% if current_admin_menu == 'users' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-users  menu-top-first">{% trans "Users" %}</a>
-                <div class="wp-submenu" style="">
-                    <div class="wp-submenu-head">{% trans "Users" %}</div>
-                    <ul>
-                        <li class="wp-first-item {% if current_admin_submenu == 'users' %} current {% endif %}"><a href="{{ SITE_URL }}/admin/users/" class="{% if current_admin_submenu == 'users' %} current {% endif %} wp-first-item">{% trans "Users" %}</a></li>
-                    </ul>
-                </div>
-            </li>            
+<div id="oaHeader">
+    <div id="oaHeaderBranding" class="brandingAdServer" style="background:url({{ ADMIN_MEDIA_URL }}/img/pjango.jpg) no-repeat;">Pijango</div>
+    <div id="oaNavigationExtraTop" class="hasSearch">
+        <ul>    
+            <li class="infoUser">Merhaba, {{ user.displayname }}</li>    
+            <li class="buttonHelp"><a href="" target="help">Yardım</a></li>    
+            <li class="buttonHelp"><a href="{{ SITE_URL }}/auth/logout/">Güvenli Çıkış</a></li>
+            <li class="buttonLogout"><a href="{{ SITE_URL }}/" target="_blank">Siteye Git</a></li>     
+        </ul>
+    </div>
+    <div id="oaSearch">
+        <form name="search" action="">
+        <input type="text" name="q" class="search" accesskey="Arama" value="{{ cl.query }}"><input class="submit" type="submit" value="&nbsp" >
+        </form>
+    </div>
+</div>
 
-            <li class="wp-has-submenu {% if admin_menu_current == 'menu_settings' %} wp-has-current-submenu wp-menu-open {% endif %} menu-top menu-icon-settings menu-top-last" id="menu-settings"> 
-                <div class='wp-menu-image'><a href='{{ SITE_URL }}/admin/settings/'><br /></a></div>
-                <div class="wp-menu-toggle"><br /></div>
-                <a href='{{ SITE_URL }}/admin/settings/' class="wp-has-submenu menu-top menu-icon-settings menu-top-last">{% trans 'Settings' %}</a> 
-                <div class='wp-submenu'>
-                    <div class='wp-submenu-head'>{% trans 'Settings' %}</div>
-                    <ul>
-                        {% for category_item in settings_category %}
-                        <li class="{% if loop.first %}wp-first-item{% endif %} {% if admin_submenu_current == category_item.category %} current {% endif %}""><a href='{{ SITE_URL }}/admin/settings/{{ category_item.category }}/' class="{% if loop.first %}wp-first-item{% endif %}">{{ category_item.category }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </li> 
-            <li class="wp-menu-separator-last"><a class="separator" href="#"><br /></a></li>
-        </ul> 
- 
-        <div id="wpbody-content">             
-            <div id="screen-meta"> 
-                <div id="contextual-help-wrap" class="hidden"> 
-                    <div class="metabox-prefs"></div> 
-                </div> 
- 
-                <div id="screen-meta-links"> 
-                    <div id="contextual-help-link-wrap" class="hide-if-no-js screen-meta-toggle"> 
-                        <a href="#contextual-help" id="contextual-help-link" class="show-settings">Help</a> 
-                    </div> 
-                </div> 
-            </div> 
-            
-            
-                
-            
-            {% get_messages %}
-            {% block content %}{% endblock %}
-            
-            <div class="clear"></div>
-        </div><!-- wpbody-content -->
+<div id="oaNavigation">
+    
+    <ul id="oaNavigationTabs">
+        {% get_admin_menu current_admin_menu %}
+    </ul>   
+    <ul id="oaNavigationExtra">
+        <li class="accountSwitcher">
+            <div class="triggerContainer">&nbsp;</div>
+        </li>
+    </ul>
+</div>
+
+
+<div id="firstLevelContent">
+    {% block first_level_content %}
+
+    <div id="secondLevelNavigation">
+        <ul class="navigation first">
+          {% get_admin_submenu current_admin_menu current_admin_submenu current_admin_submenu2 %}
+        </ul>
+        <br/>
+        {% block second_level_navigation %}{% endblock %}
         
-        <div class="clear"></div>
-    </div><!-- wpbody -->
-    <div class="clear"></div>
-</div><!-- wpcontent --> 
-</div><!-- wpwrap --> 
- 
-<div id="footer"> 
-<p id="footer-left" class="alignleft">-</p> 
-<p id="footer-upgrade" class="alignright">-</p> 
-<div class="clear"></div> 
-</div> 
+    
+        
+        
+    </div>
+    
+    <div id="secondLevelContent">
+        
+        
+        <div id="thirdLevelHeader"  class="hasTabs">
+            <div class="breadcrumb hasIcon iconAdvertisersLarge">
+                <h3 class="noBreadcrumb"><span class="label">{{ title }}</span></h3>
+                <span class="entityLinks"><span class="ent"></span></span>
+            </div>
+            <div class='corner left'></div>
+            <div class='corner right'></div>
+        </div>
+        <div id="thirdLevelNavigation">
+            {% block third_level_navigation %}{% endblock %}
+        </div>      
+        <div id="thirdLevelContent" style="min-height: 198px;">
+            <div id="thirdLevelTools">
+                {% get_messages %}
+                <ul class="contextContainer">
+                    <li><a href="" target="_blank" class="buttonLink"><span>Help</span></a></li>
+                </ul>
+            </div>      
+            {% block content %}{% endblock %}
+        </div>               
+        
+    </div>
+    {% endblock %}
+</div>
 
-</body> 
-</html> 
+
+
+
+
+
+
+</body></html>

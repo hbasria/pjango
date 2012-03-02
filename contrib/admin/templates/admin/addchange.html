@@ -1,0 +1,43 @@
+{% extends "admin/layout.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    {% for extrahead_item in extraheads %}
+        {{ extrahead_item }}
+    {% endfor %}
+{% endblock %}    
+
+{% block breadcrumb %}
+    <li><a href="">{{ title }}</a></li>
+    <li>{% if obj %}{% trans "Change" %}{% else %}{% trans "Add New" %}{% endif %}</li>
+{% endblock %}
+
+{% block third_level_navigation %}
+<ul class="navigation">
+    {% for navigation_item in third_level_navigation %}
+        <li class="{% if loop.first %}first{% endif %} {% if loop.last %}last{% endif %}"><div class="left"><div class="right"><a href="{{ navigation_item.url }}">{{ navigation_item.name }}</a></div></div></li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block content %}
+
+<div class="grid_10 clearfix">
+    <div class="block">
+        <form id="addChange{% if is_popup %}Popup{% endif %}Form" name="addChangeForm" action="" method="post">
+            <ul> 
+                {{ addchange_form }}           
+            </ul>  
+            <p>&nbsp;</p>
+        </form>
+    </div>
+    <p align="right">
+            {% if not is_popup %}
+            <a href="javascript:void(0)" onclick="$('#addChangeForm').submit();" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">{% trans "Ok" %}</span></a>
+            <a href="{{ referer }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">{% trans "Cancel" %}</span></a>
+            {% endif %}    
+    </p>
+</div>
+
+
+{% endblock %}   

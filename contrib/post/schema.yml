@@ -1,0 +1,76 @@
+PostCategory:
+    actAs:
+        NestedSet:
+            hasManyRoots: true
+            rootColumnName: root_id
+        I18n:
+            fields: [name]
+            actAs:
+                Sluggable:
+                    fields: [name]
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true
+                
+        taxonomy: string(35)   
+        name: string(100)  
+        count: integer         
+
+Post:
+    actAs:
+        Timestampable:
+        I18n:
+            fields: [title, content, excerpt]
+            actAs:
+                Sluggable:
+                    fields: [title]
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true
+                
+        title: string(255)
+        content: string
+        excerpt: string
+        status: string(35)
+        comment_status: string(35)  
+        ping_status: string(35)     
+        post_password: string(128)
+        to_ping: string
+        pinged: string        
+        post_type: string(35)
+        comment_count: integer
+        weight: integer
+        template: string(255)
+        
+        author_id: integer
+        parent_id: integer
+    relations:
+        Parent:
+            class: Post
+            local: parent_id
+            foreign: id
+        Author:
+            class: User
+            local: author_id
+            foreign: id
+        Categories:
+            class: PostCategory
+            local: post_id
+            foreign: category_id
+            refClass: PostCategories                
+            
+PostCategories:
+    tableName: post_categories
+    columns:
+        post_id:
+            type: integer
+            primary: true
+        category_id:
+            type: integer
+            primary: true               

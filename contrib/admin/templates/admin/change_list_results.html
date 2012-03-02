@@ -1,31 +1,25 @@
 {% if results %}
-<table class="widefat page fixed" cellspacing="0"> 
-     <thead> 
-         <tr>
-             <th scope="col" class="manage-column column-cb check-column" style=""><input type="checkbox" /></th>
-             {% for header in result_headers %}
-                <th scope="col" {{ header.class_attrib }}>
-                    {% if header.sortable %}<a href="{{ header.url }}">{% endif %}
-			        {% trans header.text %}
-			        {% if header.sortable %}</a>{% endif %}
-			    </th>
-			{% endfor %}
-        </tr> 
-    </thead> 
+<table cellspacing="0" summary="" class="datatable">
+    <thead>
+        <tr>
+            <th class="first toggleAll"><input type="checkbox" id="toggleAll"/></th>
+            {% for header in result_headers %}
+                <th>
+                {% if header.sortable %}<a href="{{ header.url }}">{% endif %}
+                {% trans header.text %}
+                {% if header.sortable %}</a>{% endif %}
+                </th>
+            {% endfor %}
+        </tr>
+    </thead>
     <tbody>
-        {% for result in results %}
-		<tr id="result_item-{{ result.o_id }}" class="alternate iedit">{% for item in result %}{{ item }}{% endfor %}</tr>
-		{% endfor %}
-    </tbody>         
-    <tfoot> 
-        <tr> 
-            <th scope="col" class="manage-column">&nbsp;</th>
-            <th scope="col" class="manage-column" colspan="{{ cl.list_display|count }}" align="center">{{ cl.paginator_display }}</th>                 
+    	{% for result in results %}
+        <tr class="{% cycle "even", "odd" %}">
+        	{% for item in result %}{{ item }}{% endfor %}            
         </tr> 
-    </tfoot>  
-</table> 
+        {% endfor %}            
+    </tbody>
+</table>
 
-
-
-
+<p>{{ cl.paginator_display }}</p>
 {% endif %}

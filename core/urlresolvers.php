@@ -59,29 +59,35 @@ class RegexURLPattern {
 	}
 	
 	public function resolve($path = '') {
+		$siteUrl = pjango_ini_get('SITE_URL');
 		
-		$path = str_replace($GLOBALS['SITE_URL'], '', $path);
-		
-		
-		
-        if(strrpos($path, '?')){
-		    $path = substr($path, 0, strrpos($path, '?'));
+		$pos = strrpos($path, '?');
+        if ($pos !== false) {
+        	$path = substr($path, 0, strrpos($path, '?'));
         }
-		//echo $tmp;
-		
-		
-	    if(strlen($GLOBALS['SITE_URL'])>0){
+        
+        if(strlen($siteUrl)>0){
             $path = '/'.$path; 
-            $path = str_replace($GLOBALS['SITE_URL'].'/', '', $path);   
-        }		
+            $path = str_replace($siteUrl.'/', '', $path);
+        }
+
+        //url nin sonunda / yoksa arka ekleyerek kontrol et
+        if (strlen($path)>1){
+        	$lastChar = substr($path, -1,1);
+        	if ($lastChar != "/") $path = $path."/";
+        }        
 		
-		$match = preg_match('/'.str_replace('/', '\/', $this->regex).'/', $path, $params);
+		//$match = preg_match('/'.str_replace('/', '\/', $this->regex).'/', $path, $params, PREG_OFFSET_CAPTURE, 3);
+		$match = preg_match_all('/'.str_replace('/', '\/', $this->regex).'/', $path, $params, PREG_SET_ORDER);
 		
 		if($match){
-			//echo "eslesme var";
-			unset($params[0]);
-			$this->default_args = $params;
-			//print_r($params);
+			$matches = array();
+			
+			foreach ($params[0] as $key => $value) {
+				if(is_string($key)) $matches[] = $value;
+			}
+			
+			$this->default_args = $matches;
 			return true;
 		}else{
 			//echo "eslesme yok  - ".$this->regex." - ".$path."<br/>";

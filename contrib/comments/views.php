@@ -1,7 +1,24 @@
 <?php
 require_once 'pjango/shortcuts.php';
+require_once 'pjango/contrib/admin/util.php';
+require_once 'pjango/http.php';
 
 class CommentsViews {
+	
+    function comments($request, $id=false) {
+		$templateArr = array();
+		
+		$ids = explode(':', $id);
+		
+    	$q = Doctrine_Query::create()
+				->from('Comment c')
+        		->leftJoin('c.CommentMeta cm')
+        		->where('c.content_type_id = ? AND c.object_pk = ?',$ids);
+            
+		$templateArr['comments'] = $q->execute();	  
+          
+        render_to_response('comments/comments.html', $templateArr);
+    }	
     
     function index($page = 1) {
         $templateArr = array();
@@ -55,76 +72,56 @@ class CommentsViews {
     }   
     
     function add() {
-        $templateArr = array();
-        
-        if($_POST['comment']){
-            $comment = new Comment($comment);
-            $comment->fromArray($_POST);
-            
-            $comment->status = 0; 
-            $comment->submit_date = date("Y-m-d H:i:s");   
-            $comment->ip_address =  $_SERVER['REMOTE_ADDR'];
-            $comment->is_public = true;
-            $comment->is_removed =false;
+    	$returnData = array('status'=>'0');
 
-            $comment->CommentMeta[0]->meta_key = 'user_name';
-            $comment->CommentMeta[0]->meta_value = $_POST['user_name'];
-            
-            $comment->CommentMeta[1]->meta_key = 'user_email';
-            $comment->CommentMeta[1]->meta_value = $_POST['user_email'];
-            
-            $comment->CommentMeta[2]->meta_key = 'user_location';
-            $comment->CommentMeta[2]->meta_value = $_POST['user_location'];
-            
-            $comment->CommentMeta[3]->meta_key = 'user_phone';
-            $comment->CommentMeta[3]->meta_value = $_POST['user_phone'];
-            
-            try {
-                $comment->save();
-                $templateArr['succes_message'] = 'Yorumunuz kaydedildi';
+        if($_POST['object_pk']){
+        	
+        	try {
+        		$ct = ContentType::get_for_id($_POST['content_type_id']);
+        		if ($ct){
+        			$comment = new Comment($comment);
+	            	$comment->fromArray($_POST);
+	            	
+	            	$comment->ContentType = $ct;
+	            	$comment->submit_date = date("Y-m-d H:i:s");   
+		            $comment->ip_address =  $_SERVER['REMOTE_ADDR'];
+		            $comment->is_public = true;
+		            $comment->user_id = $_SESSION['user']['id'];
+		            
+	                $comment->save();
+	                $returnData['message'] = 'Yorumunuz kaydedildi';
+        		}else{
+        			$returnData['status'] = $_POST['content_type_id'];
+                	$returnData['message'] = 'ContentType bulunamadı';
+	            
+        		}
+        		
+	            
+	            
             } catch (Exception $e) {
-                $templateArr['error_message'] = $e->getMessage();
+            	$returnData['status'] = $e->getCode();
+                $returnData['message'] = $e->getMessage();
             }
         }
         
-        render_to_response('comments/add.html', $templateArr);
+        echo json_encode($returnData);
     }
     
 
     
     
-    function admin_index() {
-        $templateArr = array('admin_menu_current'=>'menu_comments',
-        'admin_submenu_current'=>'');   
+    function admin_comments() {
+        $templateArr = array('current_admin_menu'=>'comment', 'current_admin_submenu'=>'comment'); 
 
         $q = Doctrine_Query::create()
-            ->from('Comment c')
-        ->leftJoin('c.CommentMeta cm')
-            ->where('c.is_removed = ?', array(0))
-            ->orderBy('c.submit_date DESC');
+				->from('Comment c')
+        		->leftJoin('c.CommentMeta cm');
             
             
-        $results = $q->execute();
-        $comments = $results->toArray();    
-        
-    $commentsArr = array();
-        
-
-        foreach ($comments as $commentValue) {
-            $tmpArr = array();
+		$cl = new ChangeList($q);
+		$templateArr['cl'] = $cl;	  
             
-            foreach ($commentValue['CommentMeta'] as $commentMetavalue) {
-                $commentValue['CommentMeta'][$commentMetavalue['meta_key']] = $commentMetavalue['meta_value'];
-            }
-            
-            $commentsArr[] = $commentValue;
-            
-        }
-        
-        $templateArr['comments'] = $commentsArr;    
-        
-    
-        render_to_response('comments/admin/index.html', $templateArr);
+        render_to_response('admin/change_list.html', $templateArr);
     }
     
     function admin_approve($id) {

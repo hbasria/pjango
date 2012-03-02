@@ -17,8 +17,18 @@
  * @property date $date_joined
  * @property integer $contact_id
  * @property Contact $Contact
- * @property Doctrine_Collection $Post
+ * @property Doctrine_Collection $Groups
+ * @property Doctrine_Collection $Permissions
+ * @property Doctrine_Collection $UserGroups
+ * @property Doctrine_Collection $UserPermissions
  * @property Doctrine_Collection $Comment
+ * @property Doctrine_Collection $Post
+ * @property Doctrine_Collection $Policy
+ * @property Doctrine_Collection $Account
+ * @property Doctrine_Collection $Invoice
+ * @property Doctrine_Collection $Event
+ * @property Doctrine_Collection $MailList
+ * @property Doctrine_Collection $Advert
  * 
  * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
@@ -29,7 +39,7 @@ abstract class BaseUser extends Doctrine_Record
 {
     public function setTableDefinition()
     {
-        $this->setTableName('user');
+        $this->setTableName('auth_user');
         $this->hasColumn('id', 'integer', null, array(
              'type' => 'integer',
              'primary' => true,
@@ -71,21 +81,42 @@ abstract class BaseUser extends Doctrine_Record
         $this->hasColumn('contact_id', 'integer', null, array(
              'type' => 'integer',
              ));
+        $this->hasColumn('reference_user_id', 'integer', null, array(
+                     'type' => 'integer',
+        ));        
     }
 
     public function setUp()
     {
         parent::setUp();
-        $this->hasOne('Contact', array(
-             'local' => 'contact_id',
-             'foreign' => 'id'));
+        //$this->hasOne('Contact', array(
+        //     'local' => 'contact_id',
+        //     'foreign' => 'id'));
 
-        $this->hasMany('Post', array(
-             'local' => 'id',
-             'foreign' => 'author_id'));
+        $this->hasMany('Group as Groups', array(
+             'refClass' => 'UserGroup',
+             'local' => 'user_id',
+             'foreign' => 'group_id'));
 
-        $this->hasMany('Comment', array(
+        $this->hasMany('Permission as Permissions', array(
+             'refClass' => 'UserPermission',
+             'local' => 'user_id',
+             'foreign' => 'permission_id'));
+
+        $this->hasMany('UserGroup as UserGroups', array(
              'local' => 'id',
              'foreign' => 'user_id'));
+
+        $this->hasMany('UserPermission as UserPermissions', array(
+             'local' => 'id',
+             'foreign' => 'user_id'));
+        
+        $this->hasOne('User as ReferenceUser', array(
+            'local' => 'reference_user_id',
+            'foreign' => 'id'));  
+
+        $this->hasMany('PjangoToken as Tokens', array(
+                     'local' => 'id',
+                     'foreign' => 'object_id'));        
     }
 }

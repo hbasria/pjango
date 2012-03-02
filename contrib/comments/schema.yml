@@ -20,19 +20,4 @@ Comment:
             foreign: id          
         ContentType:
             local: content_type_id
-            foreign: id   
-            
-CommentMeta:  
-    columns:
-        id:
-            type: integer
-            primary: true  
-            notnull: true
-            autoincrement: true 
-        comment_id: integer
-        meta_key: string(255)
-        meta_value: string               
-    relations:
-        Comment:
-            local: comment_id
-            foreign: id                                        
+            foreign: id                                    

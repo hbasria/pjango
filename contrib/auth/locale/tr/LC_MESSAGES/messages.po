@@ -1,0 +1,58 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Pjango\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Hasan Basri Ateş <hbasria@gmail.com>\n"
+"Language-Team: 4NET <language@4net.com.tr>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Turkish\n"
+"X-Poedit-Country: TURKEY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Invalid username/password Error"
+msgstr "Geçersiz kullanıcı adı/şifre"
+
+msgid "user.displayname"
+msgstr "Görünen Ad"
+
+msgid "user.username"
+msgstr "Kullanıcı Adı"
+
+msgid "user.email"
+msgstr "e-posta"
+
+msgid "user.password"
+msgstr "Şifre"
+
+msgid "user.is_staff"
+msgstr "Yönetime Girebilir"
+
+msgid "user.is_active"
+msgstr "Aktif"
+
+msgid "user.is_superuser"
+msgstr "Süper Kullanıcı"
+
+msgid "User Info"
+msgstr "Kullanıcı Bilgileri"
+
+msgid "Company Info"
+msgstr "Firma Bilgileri"
+
+msgid "Personnel Info"
+msgstr "Personel Bilgileri"
+
+msgid "user.date_joined"
+msgstr "Üyelik Tarihi"
+
+msgid "user.last_login"
+msgstr "Son Giriş Tarihi"
+
+
+msgid ""
+msgstr ""
+

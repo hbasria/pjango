@@ -1,0 +1,50 @@
+{% extends "admin/layout.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/tinymce/tiny_mce.js"></script>
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/tinymce/tiny_mce_config.js"></script>
+<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery.slugify.js"></script>
+
+{% endblock %}
+
+{% block content %}
+<p>&nbsp;</p>
+
+<form id="addChangeForm" name="addChangeForm" action="" method="post">
+    <ul class="addchange_form"> 
+        {{ addchange_form }}
+    </ul>
+    
+    <p>&nbsp;</p>
+    <p align="right">
+        <a href="javascript:void(0)" onclick="$('#addChangeForm').submit();" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">{% trans "Ok" %}</span></a>
+        <a href="{{ SITE_URL }}/admin/pages/" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button"><span class="ui-button-text">{% trans "Cancel" %}</span></a>
+    </p>    
+</form>  
+
+<script type="text/javascript">        
+	$(document).ready(function(){
+		$('#id_slug').slugify('#id_title');
+	});
+</script>                  
+                     
+{% endblock %}   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     

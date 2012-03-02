@@ -12,5 +12,117 @@
  */
 class User extends BaseUser
 {
+	public static function findAllAsChoice() {
+		$choicesArr = Doctrine_Query::create()
+			->select('o.id, o.displayname')
+		    ->from('User o')
+		    ->fetchArray();
+		    
+		$choices = array('-' => '----------');
+		foreach ($choicesArr as $value) {
+			$choices[$value['id']] =  $value['displayname'];
+		}
+		
+		return $choices;
+	}
+	
+	function get_group_permissions() {
+		$permsArr = array();
+		
+		if ($this->is_superuser){
+		    	/*
+		    foreach ($perms as $perm) {
+		    	$permsArr[] = sprintf('%s.%s', $perm->ContentType->app_label, $perm->codename);
+		    }		*/    
+		}else {
+			foreach ($this->Groups as $group_item) {
+				foreach ($group_item->GroupPermissions as $group_permission_item) {
+					$permission_item = $group_permission_item->Permission;					
+					$key = sprintf('%s.%s', $permission_item->ContentType->app_label, $permission_item->codename);
+					$permsArr[$key] = true;
+				}
+			}
+		}
+		
+		return $permsArr;		
+	}
+	
+	function get_all_permissions() {
+		$user_permsArr = array();
+		
+		foreach ($this->Permissions as $perm) {
+			$key = sprintf('%s.%s', $perm->ContentType->app_label, $perm->codename);
+			$user_permsArr[$key] = true;
+		}
+		
+		$user_permsArr = array_merge($user_permsArr, $this->get_group_permissions());
+		
+		
+		
+		return $user_permsArr;
+	}
+	
+	function has_perm($perm) {
+		if ($_SESSION['user']['is_superuser'] == 1) return true;
+		
+		$allPerm = $this->get_all_permissions();
+		
+		foreach ($allPerm as $key => $value) {
+			if ($key==$perm) return $value;
+		}
+		
+		return false;
+	}
+	
+	function is_authenticated() {
+		if (isset($_SESSION['user']['id'])) return true;
+		else return false;
+	}
+	
+	function generateUniqKey() {
+		$hashstr = $this->username.$this->email.$this->date_joined;
+		$hash = base64_encode(pack('H*',sha1($hashstr)));
+		return $hash;
+	}
+	
+	function changePassword($newPassword) {
+		$this->password = md5($newPassword);
+		$this->save();
+	}	
+
+	public function setCookie() {
+		
+		$expireTime = time()+(30 * 24 * 60 * 60);
+		
+		$pt = PjangoToken::make_token('User', $this->id);
+		$pt->expires = $expireTime;
+		$pt->save();
+		
+		setcookie("rme", $pt->token, $expireTime);
+	}	
+	
+	public static function getWithAllRelations($id) {
+		$obj = Doctrine_Query::create( )
+	    	->from('User u')   	
+	    	->where('u.id = ?', $id)
+	    	->fetchOne();		
+	    	
+		if($obj) return $obj;
+		else return false;		
+	}
+	
+	function get_username() {
+		$retVal = explode('@', $this->email);
+		return $retVal[0];
+	}
+	
+	function get_reference_count() {
+		$results = Doctrine_Query::create()
+			->from('User u')
+			->leftJoin('u.Tokens pt')
+			->where('u.reference_user_id = ? AND pt.status = ?', array($this->id, PjangoToken::STATUS_APPROVED));
+				
+		return count($results);
+	}
 
 }

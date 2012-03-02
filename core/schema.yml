@@ -1,0 +1,49 @@
+Settings:
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true   
+        name: string(255) 
+        value: string
+        description: string
+        category: string(255) 
+        
+PjangoMeta:  
+    tableName: pjango_meta
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true 
+        meta_key: string(255)
+        meta_value: string               
+        object_id: integer
+        content_type_id: integer
+
+    relations:
+        ContentType:
+            local: content_type_id
+            foreign: id        
+
+PjangoList:
+    tableName: pjango_list
+    actAs:
+        NestedSet:
+            hasManyRoots: true
+            rootColumnName: root_id
+        I18n:
+            fields: [name]
+            actAs:
+                Sluggable:
+                    fields: [name]
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true
+                   
+        name: string(100)

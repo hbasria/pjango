@@ -5,7 +5,7 @@ require_once 'pjango/core/urlresolvers.php';
 function url($regex, $view, $name = NULL, $prefix = NULL) {
 	
 	if (!is_string($view)) {
-		//daha sonraki fonksiyonlarda kullanılabilir
+		//TODO daha sonraki fonksiyonlarda kullanılabilir
 	}else {		
 		if (strlen($view) < 1) {
 			throw new ImproperlyConfigured(sprintf('Empty URL pattern view name not permitted (for pattern %s)', $regex));

@@ -13,157 +13,32 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "Turkish"
-msgstr "Türkçe"
+msgid "Home"
+msgstr "Anasayfa"
 
-msgid "English"
-msgstr "İngilizce"
-
-msgid "Log Out"
-msgstr "Çıkış"
-
-msgid "Dashboard"
-msgstr "Kontrol Paneli"
-
-msgid "Flat Pages"
-msgstr "Düz Sayfalar"
-
-msgid "Add New"
-msgstr "Yeni Ekle"
-
-msgid "All"
-msgstr "Tümü"
-
-msgid "Published"
-msgstr "Yayınlananlar"
-
-msgid "Search"
-msgstr "Ara"
-
-msgid "Bulk Actions"
-msgstr "Toplu İşlemler"
-
-msgid "Move to Trash"
-msgstr "Çöpe Taşı"
-
-msgid "Apply"
-msgstr "Uygula"
-
-msgid "Add/Change"
-msgstr "Ekle/Değiştir"
-
-msgid "Publish"
-msgstr "Yayınla"
-
-msgid "title"
-msgstr "Başlık"
-
-msgid "slug"
-msgstr "slug"
-
-msgid "status"
-msgstr "Durum"
-
-msgid "template name"
-msgstr "Şablon Adı"
-
-msgid "Template Name"
-msgstr "Şablon Adı"
-
-msgid "created at"
-msgstr "Oluşturulma Tarihi"
-
-msgid "Status"
-msgstr "Durum"
-
-msgid "Draft"
-msgstr "Geçici"
-
-msgid "Page Attributes"
-msgstr "Sayfa özellikleri"
-
-msgid "Enable Comments"
-msgstr "Yorumları Etkinlenştir"
-
-msgid "Registration Required"
-msgstr "Kayıt Gerekli"
-
-msgid "Edit"
-msgstr "Düzenle"
-
-msgid "Enter title here"
-msgstr "Buraya başlık girin"
-
-msgid "Bulk Actions"
-msgstr "Çoklu İşlemler"
-
-msgid "Active"
-msgstr "Aktif"
-             
-msgid "Translation__tr__title"
-msgstr "Başlık"
+msgid "Settings"
+msgstr "Ayarlar"
 
 msgid "Users"
 msgstr "Kullanıcılar"
 
-msgid "Username"
-msgstr "Kullanıcı Adı"
+msgid "Contacts"
+msgstr "Kişiler"
 
-msgid "Displayname"
-msgstr "Görünür Ad"
+msgid "Groups"
+msgstr "Gruplar"
 
-msgid "Email"
-msgstr "Eposta"
+msgid "Permissions"
+msgstr "İzinler"
 
-msgid "Is Active"
-msgstr "Aktif Mi?"
-
-msgid "Is Superuser"
-msgstr "Süper Kullanıcı Mı?"
-
-msgid "Is Staff"
-msgstr "Yönetici Mi"
-
-msgid "Last Login"
-msgstr "Son Giriş"
-
-msgid "Date Joined"
-msgstr "Eklenme Tarihi"
-
-msgid "required"
-msgstr "gerekli"
-
-msgid "Display Name"
-msgstr "Görünür Ad"
+msgid "User name"
+msgstr "Kullanıcı Adınız"
 
 msgid "Password"
-msgstr "Şifre"
+msgstr "Parolanız"
 
-msgid "Add New User"
-msgstr "Yeni Kullanıcı Ekle"
-
-msgid "Hint"
-msgstr "İpucu"
-
-msgid "The password should be at least 5 characters long. To make it stronger, use upper and lower case letters, numbers and symbols like"
-msgstr "Şifre en az 5 karakter uzunluğunda olmalıdır. Şifreyi daha güçlü yapmak için büyük küçük harfler ve sembolleri kullanın örnek: "
-
-msgid ""
-msgstr ""
-
-msgid ""
-msgstr ""
-
-msgid ""
-msgstr ""
-
-msgid ""
-msgstr ""
-
-
-
-
-
+msgid "Login"
+msgstr "Giriş Yap"
 
 msgid ""
 msgstr ""

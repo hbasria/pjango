@@ -4,7 +4,8 @@ class DatabaseError extends Exception {}
 
 
 function get_dsn($key = 'default') {
-	$confArr = $GLOBALS['DATABASES'][$key];
+	$databases = pjango_ini_get('DATABASES');
+	$confArr = $databases[$key];
 	$dsn = '';
 	
 	$dsn .= $confArr['ENGINE'].'://';

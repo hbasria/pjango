@@ -1,0 +1,79 @@
+{% extends 'layout.html' %}
+{% load 'i18n' %}
+{% block title %}Üye Ol{% endblock %}
+
+{% block extrahead %}
+<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.maskedinput-1.3.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-validation/js/jquery.validate.min.js"></script>
+{% endblock %}
+
+{% block content %}
+	<div class="sbaslik">
+        <table width="100%">
+        	<tr>
+        		<td width="16px"><img src="{{ MEDIA_URL }}/img/baslik_sol.png" width="16" height="53" /></td>
+                <td background="{{ MEDIA_URL }}/img/baslik_bg.png" class="yazi">ÜYE OL</td>
+                <td width="16px"><img src="{{ MEDIA_URL }}/img/baslik_sag.png" width="16" height="53" /></td>
+        	</tr>
+        </table>
+    </div>
+    <div class="icerik1">
+        <table width="100%">
+        	<tr><td><img src="{{ MEDIA_URL }}/img/ic_ust.png" width="990" height="14" /></td></tr>
+            <tr>
+        		<td background="{{ MEDIA_URL }}/img/ic_bg.png">
+                    <div class="yazi">  </div>
+                    <div class="kform2">
+                    	<form name="registrationForm" id="registrationForm" action="" method="post">
+                        {{ addchange_form }}
+                        
+                            <li><input type="checkbox" checked="checked" id="terms" name="terms" value="1">&nbsp;E-mail listenize kayıt olmak ve hiçbir fırsatı kaçırmak istemiyorum. (Dilediğiniz zaman size gönderilen fırsat e-postasının altında bulunan bağlantıya tıklayarak fırsat e-postalarını almayı durdurabilirsiniz) </li>
+                            <li><input type="checkbox" id="terms" name="terms" value="1">&nbsp;Sitemize kayıt olarak gizlilik poltikamızı, kullanıcı sözleşmemizi ve şartlarımızı kabul etmiş bulunmaktasınız. </li>
+                            <li><input name="submit" class="butn" type="submit" id="submit" value="Üye Ol" /></li> 
+                        </form>
+                        
+                        <script language="JavaScript" type="text/javascript"> 
+                        $(document).ready(function(){
+                            $("#id_phone").mask("(999) 999-9999");
+                            var validator = $("#registrationForm").validate({
+                                rules: {
+                                    first_name: "required",last_name: "required",phone: "required",terms: "required",
+                                    
+                                    email: {
+                                        required: true,
+                                        email: true
+                                    },
+                                    
+                                    email_confirm: {
+                                        required: "required",
+                                        equalTo: "#id_email"
+                                    },
+                                    
+                                    username: "required",
+                                    
+                                    password: "required",
+                                    
+                                    password_confirm: {
+                                        required: "required",
+                                        equalTo: "#id_password"
+                                    }
+                                    
+                                    
+                                },
+                        
+                                // set this class to error-labels to indicate valid fields
+                                success: function(label) {
+                                    // set &nbsp; as text for IE
+                                    //label.html("&nbsp;").addClass("checked");
+                                }
+                            });
+                        });
+                            
+                        </script>
+                    </div>
+                </td>
+        	</tr>
+            <tr><td><img src="{{ MEDIA_URL }}/img/ic_alt.png" width="990" height="14" /></td></tr>
+        </table>
+    </div>
+{% endblock %}

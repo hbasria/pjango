@@ -124,7 +124,7 @@ function reverse($viewname = '') {
     $path = explode('.', $viewname);
     $path = implode("/", $path);
     
-    $includePaths = explode(':', get_include_path());
+    $includePaths = explode(PATH_SEPARATOR, get_include_path());
     $includePaths = array_reverse($includePaths);
     
     $returnPath = false;

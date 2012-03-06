@@ -5,19 +5,28 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Content-Language" content="tr">
     <title>{% block title %} {% endblock %} &lsaquo; {P}jango Admin</title>
-	
-    <link rel="stylesheet" type="text/css" href="{{ ADMIN_MEDIA_URL }}/css/base.css"/>
     
     <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery-1.5.2.min.js"></script>
     
     <link rel="stylesheet" type="text/css" href="{{ ADMIN_MEDIA_URL }}/js/jquery-ui/css/flick/jquery-ui-1.8.13.custom.css" media="screen"/>    
     <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery-ui/js/jquery-ui-1.8.11.custom.min.js"></script>
+    
+    <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/ox.dropdown.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{{ ADMIN_MEDIA_URL }}/css/base.css"/>
     <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/utils.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/admin.css"/>
     
     <script type="text/javascript">
     var SITE_URL = '{{ SITE_URL }}';
     var MEDIA_URL = '{{ MEDIA_URL }}';
     var ADMIN_MEDIA_URL = '{{ ADMIN_MEDIA_URL }}';
+
+    $(document).ready(function() {
+      initAccoutSwitcher("");
+    });
+    
     </script>
     
     {% block extrahead %}{% endblock %}    
@@ -35,12 +44,31 @@
             
         </ul>
     </div>
+    <!-- div id="oaLanguages">   
+    
+        <ul>
+            <li>
+                <div class="dropDown">
+                    <span><span>{% for languages_item in LANGUAGES %}{% if languages_item.0 == LANGUAGE_CODE %}{{ languages_item.1 }}{% endif %}{% endfor %}</span></span>
+                    <div class="panel">
+                        <div>
+                            <ul>
+                                {% for languages_item in LANGUAGES %}
+                                <li><a href="?lng={{ languages_item.0 }}">{{ languages_item.1 }}</a></li>
+                                {% endfor %}     
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mask"></div>
+                </div>
+            </li>
+        </ul>
+   
+    </div>     -->
     <div id="oaSearch">
         <form name="search" action="">
         <input type="text" name="q" class="search" accesskey="Arama" value="{{ cl.query }}"><input class="submit" type="submit" value="&nbsp" >
         </form>
-        <br/><br/>
-        ({{ LANGUAGE_CODE }})<a href="?lng=tr">[TR]</a>&nbsp;<a href="?lng=en">[EN]</a>
     </div>
 </div>
 
@@ -50,9 +78,7 @@
     	{% get_admin_menu current_admin_menu %}
     </ul>   
     <ul id="oaNavigationExtra">
-    	<li class="accountSwitcher">
-    		<div class="triggerContainer">&nbsp;</div>
-    	</li>
+        {% account_switcher %}
     </ul>
 </div>
 

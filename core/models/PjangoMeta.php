@@ -13,9 +13,10 @@
 class PjangoMeta extends BasePjangoMeta
 {
 	public static function getMeta($contentTypeId, $objectId, $metaKey = false) {
+	    $isteId = pjango_ini_get('SITE_ID');
 		$q = Doctrine_Query::create()
 			->from('PjangoMeta pm')
-			->addWhere('pm.content_type_id = ? AND pm.object_id = ?', array($contentTypeId, $objectId));
+			->addWhere('pm.site_id = ? AND pm.content_type_id = ? AND pm.object_id = ?', array($isteId, $contentTypeId, $objectId));
 		
 		if ($metaKey){
 			$q = $q->addWhere('pm.meta_key = ?', $metaKey)
@@ -28,6 +29,18 @@ class PjangoMeta extends BasePjangoMeta
 	}
 	
 	public static function setMeta($contentTypeId, $objectId, $metaKeys = false, $metaValues = false) {
+	    $isteId = pjango_ini_get('SITE_ID');
+		
+// 		metaları bul
+		if (!is_array($metaKeys)){
+			$metaKeys = array();
+			// 		meta_
+			foreach ($metaValues as $key => $value) {
+				if(substr($key, 0, 5) == 'meta_'){
+					$metaKeys[] = $key;
+				}
+			}
+		}		
 		
 		if (is_array($metaKeys) && is_array($metaValues)){
 					
@@ -38,9 +51,16 @@ class PjangoMeta extends BasePjangoMeta
 				if (!$meta) $meta = new PjangoMeta();
 					
 				$meta->content_type_id = $contentTypeId;
+				$meta->site_id = $isteId;
 				$meta->object_id = $objectId;
 				$meta->meta_key = $key;
+				
+				if(is_array($metaValues[$key])){
+				    $meta->meta_value = serialize($metaValues[$key]);
+				}else {
 				$meta->meta_value = $metaValues[$key];
+				}				
+				
 				$meta->save();
 			}
 		}

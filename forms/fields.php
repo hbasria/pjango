@@ -18,7 +18,7 @@ require_once('pjango/forms/widgets.php');
  * Various helper types.
  **/
 require_once('pjango/forms/types.php');
-require_once 'date.class.php';
+require_once 'pjango/utils/date.php';
 /**
  * ValidationError
  * 
@@ -190,9 +190,8 @@ abstract class PhormField
         $attr = $this->attributes;
         $retVal = $this->value;
         
-        if (isset($this->format)){
-        	$sd = new simpledatetime();
-        	$retVal = $sd->Format('d.m.Y H:i:s', 'Y-m-d H:i:s', $retVal);
+        if((method_exists($this,'export_value'))){
+            $retVal = $this->export_value($this->value);
         }
         
         return $widget->html($retVal, $this->attributes);
@@ -208,8 +207,8 @@ abstract class PhormField
         $elts = array();
         if (is_array($this->errors) && count($this->errors) > 0)
             foreach ($this->errors as $error)
-                $elts[] = sprintf('<li>%s</li>', $error);
-        return sprintf('<ul class="phorm_error">%s</ul>', implode($elts));
+                $elts[] = sprintf('%s', $error);
+        return sprintf('<p class="phorm_error">%s</p>', implode('<br/>', $elts));
     }
     
     /**
@@ -219,7 +218,7 @@ abstract class PhormField
      **/
     public function __toString()
     {
-        return $this->label().$this->html() . $this->help_text() . $this->errors();
+        return $this->html() . $this->help_text() . $this->errors();
     }
     
     /**
@@ -660,8 +659,8 @@ class PasswordField extends TextField
      **/
     public function import_value($value)
     {
-    	//return call_user_func($this->hash_function, array($value));
-        return md5($value);
+        if(strlen($value)>0) return call_user_func($this->hash_function, array($value));
+        else return '';
     }
 }
 
@@ -1067,6 +1066,65 @@ class EmailField extends TextField
     }
 }
 
+
+/**
+ * DateField
+ *
+ * A text field that accepts a variety of date/time formats (those accepted by
+ * PHP's built-in strtotime.) Note that due to the reliance on strtotime, this
+ * class has a serious memory leak in PHP 5.2.8 (I am unsure if it is present
+ * as well in 5.2.9+.)
+ * @author Jeff Ober
+ * @package Fields
+ **/
+class DateField extends TextField
+{
+    /**
+     * @author Jeff Ober
+     * @param string $label the field's text label
+     * @param array $validators a list of callbacks to validate the field data
+     * @param array $attributes a list of key/value pairs representing HTML attributes
+     **/
+    public function __construct($label, $format="d.m.Y", array $validators=array(), array $attributes=array())
+    {
+        $this->format = $format;
+        parent::__construct($label, 25, 100, $validators, $attributes);
+    }
+
+    /**
+     * Validates that the value is parsable as a date/time value.
+     * @author Jeff Ober
+     * @param string $value
+     * @return null
+     * @throws ValidationError
+     **/
+    public function validate($value)
+    {
+        parent::validate($value);
+        if (!strtotime($value))
+        throw new ValidationError("Date format not recognized.");
+    }
+
+    /**
+     * Imports the value and returns a unix timestamp (the number of seconds
+     * since the epoch.)
+     * @author Jeff Ober
+     * @param string $value
+     * @return int the date/time as a unix timestamp
+     **/
+    public function import_value($value)
+    {
+        $retVal = parent::import_value($value);        
+        return SimpleDate::parse($value, $this->format)->toString('Y-m-d');
+    }
+    
+    public function export_value($value)
+    {
+        if(strlen($value)<=0) $value = date('Y-m-d');        
+        return SimpleDate::parse($value, 'Y-m-d')->toString($this->format);
+    }    
+}
+
 /**
  * DateTimeField
  * 
@@ -1085,7 +1143,7 @@ class DateTimeField extends TextField
      * @param array $validators a list of callbacks to validate the field data
      * @param array $attributes a list of key/value pairs representing HTML attributes
      **/
-    public function __construct($label, $format="d.m.Y", array $validators=array(), array $attributes=array())
+    public function __construct($label, $format="d.m.Y H:i:s", array $validators=array(), array $attributes=array())
     {
     	$this->format = $format;
         parent::__construct($label, 25, 100, $validators, $attributes);
@@ -1114,10 +1172,19 @@ class DateTimeField extends TextField
      **/
     public function import_value($value)
     {
-        $value = parent::import_value($value);
-//         return strtotime($value);
-        return $value;
+        $retVal = parent::import_value($value);
+        
+        return SimpleDate::parse($retVal, $this->format)
+                ->toString('Y-m-d H:i:s');
     }
+    
+    public function export_value($value)
+    {
+        if(strlen($value)<=0) $value = date('Y-m-d H:i:s');
+        
+        return SimpleDate::parse($value, 'Y-m-d H:i:s')
+                ->toString($this->format);
+    }    
 }
 
 /**
@@ -1348,4 +1415,60 @@ class OptionsField extends MultipleChoiceField
     }
 }
 
+class RadioButton extends PhormField
+{
+    /**
+     * An array storing the drop-down's choices.
+     **/
+    private $choices;
+    
+    /**
+     * @author Jeff Ober
+     * @param string $label the field's text label
+     * @param array $choices a list of choices as actual_value=>display_value
+     * @param array $validators a list of callbacks to validate the field data
+     * @param array $attributes a list of key/value pairs representing HTML attributes
+     **/
+    public function __construct($label, array $choices, array $validators=array(), array $attributes=array())
+    {
+        parent::__construct($label, $validators, $attributes);
+        $this->choices = $choices;
+    }
+    
+    /**
+     * Returns a new SelectWidget.
+     * @author Jeff Ober
+     * @return SelectWidget
+     **/
+    public function get_widget()
+    {
+        return new RadioWidget($this->choices);
+    }
+    
+    /**
+     * Validates that $value is present in $this->choices.
+     * @author Jeff Ober
+     * @param string $value
+     * @return null
+     * @throws ValidationError
+     * @see DropDownField::$choices
+     **/
+    public function validate($value)
+    {
+        if (!in_array($value, array_keys($this->choices)))
+            throw new ValidationError("Invalid selection.");
+    }
+    
+    /**
+     * Imports the value by decoding any HTML entities. Returns the "actual"
+     * value of the option selected.
+     * @author Jeff Ober
+     * @param string $value
+     * @return string the decoded string
+     **/
+    public function import_value($value)
+    {
+        return $value; // html_entity_decode((string)$value);
+    }
+}
 ?>

@@ -10,17 +10,19 @@
  * @property string $value
  * @property string $description
  * @property string $category
+ * @property integer $site_id
+ * @property Site $Site
  * 
- * @package    {P}jango
+ * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
- * @author     Hasan Basri Ateş <hbasria@4net.com.tr>
+ * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 7490 2010-03-29 19:53:27Z jwage $
  */
 abstract class BaseSettings extends Doctrine_Record
 {
     public function setTableDefinition()
     {
-        $this->setTableName('settings');
+        $this->setTableName('pjango_settings');
         $this->hasColumn('id', 'integer', null, array(
              'type' => 'integer',
              'primary' => true,
@@ -40,11 +42,16 @@ abstract class BaseSettings extends Doctrine_Record
              'type' => 'string',
              'length' => '255',
              ));
+        $this->hasColumn('site_id', 'integer', null, array(
+             'type' => 'integer',
+             ));
     }
 
     public function setUp()
     {
         parent::setUp();
-        
+        $this->hasOne('Site', array(
+             'local' => 'site_id',
+             'foreign' => 'id'));
     }
 }

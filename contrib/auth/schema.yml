@@ -24,7 +24,11 @@ Group:
             notnull: true
             autoincrement: true   
         name:  string(100)
+        site_id: integer
     relations:
+        Site:
+            local: site_id
+            foreign: id         
         Permissions:
             foreignAlias: Groups
             class: Permission
@@ -65,10 +69,14 @@ User:
         is_active: boolean
         is_superuser: boolean
         last_login: timestamp
-        date_joined: date    
+        date_joined: date
+        
         contact_id: integer
-        reference_user_id: integer      
+        site_id: integer
     relations:
+        Site:
+            local: site_id
+            foreign: id        
         Groups:
             class: Group
             refClass: UserGroup
@@ -76,10 +84,7 @@ User:
         Permissions:
             class: Permission
             refClass: UserPermission
-            foreignAlias: Users     
-        ReferenceUser:
-            local: reference_user_id
-            foreign: id                       
+            foreignAlias: Users                  
         
                                 
 UserGroup:

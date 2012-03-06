@@ -1,4 +1,5 @@
 ContentType:
+    tableName: pjango_content_type
     columns:
         id:
             type: integer

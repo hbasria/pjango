@@ -32,8 +32,7 @@ class PostForm extends Form {
 		$this->id = new HiddenField();
 		$this->images = new HiddenField();
 		
-		$this->categories = new DropDownField(pjango_gettext("post.categories"),
-				PostCategory::findAllAsChoice($this->taxonomy));		
+		$this->categories = new MultipleChoiceField(pjango_gettext("post.categories"), PostCategory::findAllAsChoice($this->taxonomy));
 		
 		$this->status = new DropDownField(pjango_gettext("post.status"),
 				Post::getStatusChoices());

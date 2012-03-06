@@ -22,7 +22,6 @@ class ContentType extends BaseContentType
 			$choices[$value['id']] =  $value['app_label'].'.'.$value['model'];
 		}
 		
-		
 		return $choices;
 	}
 		

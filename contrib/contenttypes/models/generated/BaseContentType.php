@@ -21,7 +21,7 @@ abstract class BaseContentType extends Doctrine_Record
 {
     public function setTableDefinition()
     {
-        $this->setTableName('content_type');
+        $this->setTableName('pjango_content_type');
         $this->hasColumn('id', 'integer', null, array(
              'type' => 'integer',
              'primary' => true,

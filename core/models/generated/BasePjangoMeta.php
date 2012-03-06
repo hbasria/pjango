@@ -10,11 +10,13 @@
  * @property string $meta_value
  * @property integer $object_id
  * @property integer $content_type_id
+ * @property integer $site_id
+ * @property Site $Site
  * @property ContentType $ContentType
  * 
- * @package    {P}jango
+ * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
- * @author     Hasan Basri Ateş <hbasria@4net.com.tr>
+ * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 7490 2010-03-29 19:53:27Z jwage $
  */
 abstract class BasePjangoMeta extends Doctrine_Record
@@ -40,11 +42,18 @@ abstract class BasePjangoMeta extends Doctrine_Record
         $this->hasColumn('content_type_id', 'integer', null, array(
              'type' => 'integer',
              ));
+        $this->hasColumn('site_id', 'integer', null, array(
+             'type' => 'integer',
+             ));
     }
 
     public function setUp()
     {
         parent::setUp();
+        $this->hasOne('Site', array(
+             'local' => 'site_id',
+             'foreign' => 'id'));
+
         $this->hasOne('ContentType', array(
              'local' => 'content_type_id',
              'foreign' => 'id'));

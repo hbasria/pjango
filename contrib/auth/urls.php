@@ -16,12 +16,6 @@ $urlpatterns = patterns('',
    array('^admin/permission/$', 'pjango.contrib.auth.views.admin_permissions'),
    array('^admin/permission/add/$', 'pjango.contrib.auth.views.admin_permission_addchange'),
    
-   array('^auth/lostpasword/$', 'pjango.contrib.auth.views.lostpasword'),
-   array('^auth/registration/$', 'pjango.contrib.auth.views.registration'),
    array('^auth/login/$', 'pjango.contrib.auth.views.login'),
-   array('^auth/logout/$', 'pjango.contrib.auth.views.logout'),   
-   
-   array('^password_change/$', 'pjango.contrib.auth.views.password_change'),
-   array('^password_reset/$', 'pjango.contrib.auth.views.password_reset')
-   
+   array('^auth/logout/$', 'pjango.contrib.auth.views.logout')   
 );

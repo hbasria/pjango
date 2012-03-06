@@ -7,7 +7,7 @@ class PostCategoryAdmin extends ModelAdmin {
 
 		$this->list_display = array('get_name');
 		$this->ordering = array('lft');
-		$this->row_actions = array('edit', 'delete');
+		$this->row_actions = array('edit', array('name'=>'delete', 'url'=>'/admin/delete/PostCategory/'));
 	}
 
 }
@@ -15,15 +15,16 @@ class PostCategoryAdmin extends ModelAdmin {
 class PostAdmin extends ModelAdmin {
 	
     public function __construct(){
-    	$this->list_display = array('get_title', 'get_slug', 'status', 'created_at', 'updated_at');
+    	$this->list_display = array('get_category_names', 'get_title', 'get_slug', 'status', 'created_at', 'updated_at');
     	$this->list_filter = array('status');
     	$this->search_fields = array('status','t.title');
     	
     	$user = get_user();
     	if($user->has_perm('post.show_Post')){
-    		$this->admin_menu = array('post', pjango_gettext('Post'), '/admin/post/',
-    			array('post', pjango_gettext('Post'), '/admin/post/',
-    			array('categories', pjango_gettext('Categories'), '/admin/post/categories/'))
+    		$this->admin_menu = array('post', pjango_gettext('Post'), '/admin/post/Post/',
+    			array('post', pjango_gettext('Post'), '/admin/post/Post/',
+    		        array('Post', pjango_gettext('Posts'), '/admin/post/Post/'),
+    			    array('PostCategory', pjango_gettext('Categories'), '/admin/post/PostCategory/'))
     		);
     		
     	}

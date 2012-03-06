@@ -24,7 +24,7 @@ class PjangoToken extends BasePjangoToken
 		$_instance = new self();
 		$_instance->token = md5(uniqid(rand(), true));
 		$_instance->status = self::STATUS_NEW;
-		$_instance->expires =date('Y-m-d', time()+(7 * 24 * 60 * 60));
+		$_instance->expires =date('Y-m-d H:i:s', time()+(7 * 24 * 60 * 60));
 		$_instance->object_id = $objectId;
 		$_instance->ContentType = $ctype;
 		$_instance->save();

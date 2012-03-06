@@ -18,7 +18,7 @@ function render_to_response($templateFile, $templateArr, $isReturn = false){
     }else{    	
     	$templateArr = array_merge($templateArr, $GLOBALS['SETTINGS']);
     	
-    	if (isset($_SESSION['user']['id'])) $templateArr['user'] = get_user();
+    	$templateArr['user'] = get_user();
     	
     	$h2oConfig = pjango_ini_get('H2O_CONFIG');
 	

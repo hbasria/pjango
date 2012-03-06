@@ -11,9 +11,115 @@ class AdminViews {
 		render_to_response('admin/index.html', array());
 	}
 	
+	function app_index($request, $app_label=false, $model=false, $id=false) {
+	    $templateArr = array('current_admin_menu'=>$app_label,
+	    				'current_admin_submenu'=>$app_label, 
+	    				'current_admin_submenu2'=>$model,
+	    				'title'=>pjango_gettext($model.' list')); 
+
+	    $q = Doctrine_Query::create()
+	        ->from($model.' o');
+	    
+// 	    $modelRelations = Doctrine_Core::getTable($model)->getRelations();	    
+// 	    foreach($modelRelations as $name => $relation) {
+// 	        $q->leftJoin('o.'.$name);
+// 	    }
+	    
+	    $cl = new ChangeList($q);
+	    $templateArr['cl'] = $cl;
+	
+	    render_to_response('admin/change_list.html', $templateArr);	
+	}	
+	
+	function app_addchange($request, $app_label=false, $model=false, $id=false) {
+	    $templateArr = array('current_admin_menu'=>$app_label,
+		    				'current_admin_submenu'=>$app_label, 
+	    					'current_admin_submenu2'=>$model,
+		    				'title'=>pjango_gettext($model.' add/change')); 
+
+	    
+	    if(!$request->user->has_perm($app_label.'.can_change_'.$model)){
+	        Messages::Error('Bu işlemi yapmak için yetkiniz yok.');
+	        HttpResponseRedirect($_SERVER['HTTP_REFERER']);
+	    }
+	    
+	    if (isset($_GET['is_popup'])){
+	        $templateArr['is_popup'] = true;
+	    }	    
+	    
+	    $modelClass = $model;
+		$formClass = $modelClass.'Form';
+		$formData = array();
+		$contentType = ContentType::get_for_model($modelClass);
+		
+		if ($id){
+		    $modelObj = Doctrine_Query::create()
+    		    ->from($modelClass.' o')
+    		    ->where('o.id = ?', $id)
+    		    ->fetchOne();
+		    
+		    if ($modelObj) {
+		        
+		        if((method_exists($modelObj,'toMyArray'))){
+		            $formData = $modelObj->toMyArray();
+		        }else {
+		        $formData = $modelObj->toArray();
+		        }
+		        
+		        $metaData = PjangoMeta::getMeta($contentType->id, $modelObj->id);
+		        foreach ($metaData as $metaDataItem) {
+		            $formData[$metaDataItem->meta_key] = $metaDataItem->meta_value;
+		        }		        
+		    }
+		}
+		
+		if ($request->POST){
+		    $form = new $formClass($request->POST);
+		    
+		    try {
+		        if (!$form->is_valid()) throw new Exception(pjango_gettext('There are some errors, please correct them below.'));
+		        
+		        $formData = $form->cleaned_data();
+		        if(!$modelObj) $modelObj = new $modelClass();
+		        
+// 		        if ($modelObj->state() == Doctrine_Record::STATE_TCLEAN){
+// 		            $modelObj->created_by = $request->user->id;
+// 		        }else{
+// 		            $modelObj->updated_by = $request->user->id;
+// 		        }		  
+
+		        if((method_exists($modelObj,'fromMyArray'))){
+		            $modelObj->fromMyArray($formData);
+		        }else {
+		        $modelObj->fromArray($formData);
+		        }		        
+		        
+		        $modelObj->save();
+		        
+		        PjangoMeta::setMeta($contentType->id, $modelObj->id, false, $request->POST);
+		        
+		        Messages::Info('The operation completed successfully');
+		        HttpResponseRedirect("/admin/{$app_label}/{$model}/");
+		        
+	        } catch (Exception $e) {
+	            Messages::Error($e->getMessage());
+	        }
+		}
+		
+		if (!$form) $form = new $formClass($formData);
+		$templateArr['addchange_form'] = $form->as_list();		
+	
+	    render_to_response('admin/addchange.html', $templateArr);
+	}	
+	
+	
+	
+	
 	function settings($request, $category = 'GENERAL') {
 		$templateArr = array('current_admin_menu'=>'settings', 
-				'current_admin_submenu'=>'general');	
+				'current_admin_submenu'		=> 'GENERAL',
+				'current_admin_submenu2'	=> 'GENERAL'
+		);	
 		
 		
 		if(isset($_POST['Settings'])){
@@ -40,7 +146,7 @@ class AdminViews {
             
 		if ($category){
 			$q->where('s.category = ?', array($category));
-			$templateArr['admin_submenu_current'] = $category;            
+			$templateArr['current_admin_submenu2'] = strtoupper($category);            
 		}            
             
         $templateArr['settings'] = $q->fetchArray();               

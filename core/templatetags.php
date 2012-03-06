@@ -1,5 +1,4 @@
 <?php 
-
 class Get_Messages_Tag extends H2o_Node {
     function __construct($argstring, $parser, $pos=0) {
 

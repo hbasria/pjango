@@ -16,42 +16,26 @@ msgstr ""
 msgid "Invalid username/password Error"
 msgstr "Geçersiz kullanıcı adı/şifre"
 
-msgid "user.displayname"
+msgid "Displayname"
 msgstr "Görünen Ad"
 
 msgid "user.username"
 msgstr "Kullanıcı Adı"
 
-msgid "user.email"
-msgstr "e-posta"
+msgid "Email"
+msgstr "E-posta"
 
-msgid "user.password"
-msgstr "Şifre"
-
-msgid "user.is_staff"
+msgid "Is Staff"
 msgstr "Yönetime Girebilir"
 
-msgid "user.is_active"
+msgid "Is Active"
 msgstr "Aktif"
 
-msgid "user.is_superuser"
-msgstr "Süper Kullanıcı"
-
-msgid "User Info"
-msgstr "Kullanıcı Bilgileri"
-
-msgid "Company Info"
-msgstr "Firma Bilgileri"
-
-msgid "Personnel Info"
-msgstr "Personel Bilgileri"
-
-msgid "user.date_joined"
+msgid "Date Joined"
 msgstr "Üyelik Tarihi"
 
-msgid "user.last_login"
+msgid "Last Login"
 msgstr "Son Giriş Tarihi"
-
 
 msgid ""
 msgstr ""

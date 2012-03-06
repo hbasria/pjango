@@ -20,7 +20,6 @@ class AdminSite {
 			$admin_class = ModelAdmin;
 		}
 		
-		/*
 		if ($model_or_iterable instanceof ModelAdmin){
 			
 		}else {
@@ -28,8 +27,6 @@ class AdminSite {
 		}*/
 		
 		$this->_registry[$model_or_iterable] = $admin_class;
-		 
-		
 	}
 }
 

@@ -1,6 +1,8 @@
 <?php 
+require_once 'pjango/contrib/auth/util.php';
+
 function getRequestUri() {
-// 	$retVal = isset($_SERVER['ORIG_PATH_INFO']) ? $_SERVER['ORIG_PATH_INFO'] : '';
+ 	$retVal = isset($_SERVER['ORIG_PATH_INFO']) ? $_SERVER['ORIG_PATH_INFO'] : '';
 	$retVal = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 	return $retVal;
 }
@@ -43,22 +45,15 @@ class HttpRequest {
 		
 		$parts = explode('/', $requestUri);
 		array_shift($parts);
-		$requestUri = implode('/', $parts);		
-		
-		$match1 = preg_match('/'.str_replace('/', '\/', 'admin').'/', $requestUri, $params1);
-		$match2 = preg_match('/'.str_replace('/', '\/', 'profile').'/', $requestUri, $params2);
 
+		$requestUri = implode('/', $parts);
+		$adminPageRegex = 'admin\/?';
+		
+		$match1 = preg_match('/'.$adminPageRegex.'/', $requestUri, $params1);
 		
 		if($match1){
-			if (isset($_SESSION['user']['is_staff']) != 1){
-				echo '<meta http-equiv="Refresh" content="0;URL='.$GLOBALS['SETTINGS']['SITE_URL'].$GLOBALS['SETTINGS']['LOGIN_URL'].'">';
-				exit();
-			}
-		}
-		
-		if($match2){
-			if (isset($_SESSION['user']['is_active']) != 1){
-				echo '<meta http-equiv="Refresh" content="0;URL='.$GLOBALS['SETTINGS']['SITE_URL'].$GLOBALS['SETTINGS']['LOGIN_URL'].'">';
+			if ($this->user->is_staff != 1){
+			    HttpResponseRedirect(pjango_ini_get('LOGIN_URL'));
 				exit();
 			}			
 		}

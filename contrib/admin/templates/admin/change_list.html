@@ -1,10 +1,7 @@
 {% extends "admin/layout.html" %}
 {% load i18n %}
 
-{% block extrahead %}
-
-    <script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/ox.dropdown.js"></script>    
-{% endblock %}
+{% block extrahead %}{% endblock %}
 
 {% block breadcrumb %}
     <li>{{ title }}</li>
@@ -13,7 +10,7 @@
 {% block third_level_navigation %}
 <ul class="navigation">
     {% for navigation_item in third_level_navigation %}
-        <li class="{% if loop.first %}first{% endif %} {% if loop.last %}last{% endif %}"><div class="left"><div class="right"><a href="{{ navigation_item.url }}">{{ navigation_item.name }}</a></div></div></li>
+        <li class="{% if loop.first %}first{% endif %} {% if loop.last %}last{% endif %} {{ navigation_item.class }}"><div class="left"><div class="right"><a href="{{ navigation_item.url }}">{{ navigation_item.name }}</a></div></div></li>
     {% endfor %}
 </ul>
 {% endblock %}

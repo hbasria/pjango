@@ -8,9 +8,9 @@
  * @property integer $post_id
  * @property integer $category_id
  * 
- * @package    {P}jango
+ * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
- * @author     Hasan Basri Ateş <hbasria@4net.com.tr>
+ * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 7490 2010-03-29 19:53:27Z jwage $
  */
 abstract class BasePostCategories extends Doctrine_Record

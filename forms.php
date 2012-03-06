@@ -1,5 +1,12 @@
 <?php
 
+class FormValidationException extends Exception {
+    public function __construct($message = false, $code = 0, Exception $previous = null) {
+        $message = pjango_gettext('There are some errors, please correct them below.');
+        parent::__construct($message, $code);
+    }
+}
+
 /**
  * Forms: HTML form widgets with validation
  * 
@@ -397,7 +404,7 @@ abstract class Form
         {
             $label = $field->label();
             if ($label !== '')
-                $elts[] = sprintf('<li>%s</li>', $field);
+                $elts[] = sprintf('<li>%s %s</li>', $field->label(), $field);
             else
                 $elts[] = strval($field);
         }

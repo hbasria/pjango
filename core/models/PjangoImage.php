@@ -32,5 +32,17 @@ class PjangoImage extends BasePjangoImage
 	public function get_thumb_elem() {
 		return sprintf('<img src="%s" height="32">', $this->image);		
 	}
+	
+	public function get_absolute_url() {
+	    $siteUrl = pjango_ini_get('SITE_URL_PREFIX');	     
+	    $imageUrl = $this->image;
+	    
+        if(substr($this->image, 0, 7) == 'http://'){
+            $imageUrl = str_replace($siteUrl.'/', '', $imageUrl);
+        }
+        
+        return $imageUrl;
+	}
+
 
 }

@@ -1,10 +1,14 @@
-<?php 
-require_once 'pjango/conf/global_settings.php';
-require_once  APPLICATION_PATH.'/settings.php';	
+<?php
+require_once 'Doctrine.php';
+require_once 'pjango/h2o.php';
+require_once 'pjango/utils/translation.php';
+require_once 'pjango/core/urlresolvers.php';
+require_once 'pjango/contrib/admin/sites.php';
+require_once 'pjango/http.php';
+require_once 'pjango/utils/messages.php';
+require_once 'pjango/core/admin.php';
 
 $GLOBALS['SETTINGS'] = $SETTINGS;
-
-
 function pjango_ini_set($varname, $newvalue) {
 	return $GLOBALS['SETTINGS'][$varname] = $newvalue;	
 }
@@ -13,17 +17,7 @@ function pjango_ini_get($param) {
 	if (isset($GLOBALS['SETTINGS'][$param]))
 		return $GLOBALS['SETTINGS'][$param];
 	else return false;	
-}
-
-require_once 'Doctrine.php';	
-require_once 'h2o.php';	
-require_once 'pjango/utils/translation.php';
-require_once 'pjango/core/urlresolvers.php';
-require_once 'pjango/contrib/admin/sites.php';
-require_once 'pjango/http.php';
-
-require_once 'Messages.php';			
-
+}		
 
 class Pjango_Application_Bootstrap {
 	protected $_application;
@@ -32,12 +26,15 @@ class Pjango_Application_Bootstrap {
 		$this->_application = $application;
 	}
 	
-	public function run(){
+	public function run($options = array()){
 		global $urlpatterns;
+		
+
 
 		$this->init_set();
 		$this->init_logging();
 		$this->init_session();
+		$this->init_sites();
 		$this->init_doctrine();
 		$this->init_locale();		
 		$this->init_apps();
@@ -57,13 +54,16 @@ class Pjango_Application_Bootstrap {
 		## çoklu dil desteğini yükle ## 
 		Translation::trans();
 		
-		$request = new HttpRequest();
-		$request->request();
+		if(isset($options['console']) && $options['console'] == true){
+			echo "pjango application running ".$options['environment']." mode...\n";
+		}else {
+			$request = new HttpRequest();
+			$request->request();			
+		}
 		
 	}	
 	
-	protected function init_set(){
-		
+	protected function init_set(){		
 		if (pjango_ini_get('DEBUG') === true) {
 			error_reporting(E_ALL & ~E_NOTICE);
 			ini_set("display_errors", 1);
@@ -73,10 +73,19 @@ class Pjango_Application_Bootstrap {
 	}	
 	
 	protected function init_session(){
-		session_start();
-		
-		if(!isset($_SESSION['user'])) $_SESSION['user'] = 0;
+		session_start();		
+		if(!isset($_SESSION['user'])) $_SESSION['user'] = serialize(array());
 	}
+	
+	protected function init_sites(){
+	    if (isset($_GET['site'])) {
+	        $_SESSION['SITE_ID'] = $_GET['site'];
+	    }
+	    
+	    if (isset($_SESSION['SITE_ID'])) {
+	        pjango_ini_set('SITE_ID', $_SESSION['SITE_ID']);
+	    }
+	}	
 	
 	protected function init_locale(){
 		if (pjango_ini_get('TIME_ZONE')) {
@@ -113,15 +122,14 @@ class Pjango_Application_Bootstrap {
 	}
 	
 	protected function init_apps(){
-		
-			//INSTALLED_APPS uygulamalar için gerekli modülleri yükle
-		
-		
+    	//INSTALLED_APPS uygulamalar için gerekli modülleri yükle
 		$installedApps = pjango_ini_get('INSTALLED_APPS');
 		$_installedApps = array();
 		
+		
+		
 		foreach ($installedApps as $app) {
-			
+			$languageCode = pjango_ini_get('LANGUAGE_CODE');
 			$appPath = reverse($app);
 			
 			if($appPath){
@@ -137,7 +145,7 @@ class Pjango_Application_Bootstrap {
 		        	$GLOBALS['SETTINGS']['TEMPLATE_DIRS'][] = $appPath.'/templates';
 		        }
 		        
-		        $tmpPath = $appPath.'/locale/'.$GLOBALS['SETTINGS']['LANGUAGE_CODE'].'/LC_MESSAGES/messages.po';
+		        $tmpPath = $appPath.'/locale/'.$languageCode.'/LC_MESSAGES/messages.po';
 		        if(is_file($tmpPath)){
 		        	$_installedApps[$app]['lang_file'] = $tmpPath;
 		        	$GLOBALS['SETTINGS']['LOCALE_PATHS'][] = $tmpPath;
@@ -163,14 +171,10 @@ class Pjango_Application_Bootstrap {
 			}    
 		}	
 
-		pjango_ini_set('_INSTALLED_APPS', $_installedApps);
-		
+		pjango_ini_set('_INSTALLED_APPS', $_installedApps);		
 	}
 	
 	protected function init_models(){
-			//modelleri yükle
-		//Doctrine::loadModels(MODELS_PATH);
-		//$GLOBALS['SETTINGS']['LOADED_MODELS'] = array();
 		$_installedApps = pjango_ini_get('_INSTALLED_APPS');
 		$loadedModels = array();
 		foreach ($_installedApps as $app) {
@@ -183,27 +187,35 @@ class Pjango_Application_Bootstrap {
 	protected function init_h2o(){
 		$h2oConfig = array('template_dirs' => pjango_ini_get('TEMPLATE_DIRS'));		
 		pjango_ini_set('H2O_CONFIG', $h2oConfig);
-		
-
 	}
 	
 	protected function init_logging(){
-		require_once 'Log.php';
-		
-		$conf = array('error_prepend' => '<font color="#ff0000"><tt>',
-              'error_append'  => '</tt></font>');
-		$logger = &Log::singleton('display', '', '', $conf, PEAR_LOG_DEBUG);
-		$this->_application->setLogger($logger);
+	    $loggerFile = reverse('Log');
+	    
+	    if ($loggerFile) {
+	        require_once $loggerFile;
+	        
+	        $conf = pjango_ini_get('LOGGING');
+	        
+	        $logger = Log::singleton($conf['handler'], $conf['name'], $conf['ident'], $conf);	        
+	        $this->_application->setLogger($logger);
+	    }
 	}	
 	
 	protected function init_settings(){
-			$settings = Doctrine_Query::create()
-			    ->from("Settings s")
-			    ->execute();
+	    $siteId = pjango_ini_get('SITE_ID');
+	    
+	    try {
+	        $settings = Doctrine_Query::create()
+	        ->from('Settings s')
+	        ->where('s.site_id = ?', $siteId)
+	        ->execute();	   
 
-			foreach ($settings as $setting_item) {
-				pjango_ini_set($setting_item->name, $setting_item->value);
-			}
+	        foreach ($settings as $setting_item) {
+	            pjango_ini_set($setting_item->name, $setting_item->value);
+	        }	        
+	        
+	    } catch (Exception $e) {}
 	}
 	
 	
@@ -262,8 +274,9 @@ class Pjango_Application {
         return $this->_environment;
     }    
     
-    public static function getLogger(){
+    public static function getLogger($cls = 'pjango'){
         $pa = self::getInstance();
+        $pa->_logger->setIdent($cls);
         return $pa->_logger;
     }	
 
@@ -272,9 +285,11 @@ class Pjango_Application {
         $pa->_logger = $logger;        
     }    
     
-    public function run($environment, $options = null){
+    public function run($environment, $options = array()){
     	$this->_environment = (string) $environment;
-        $this->getBootstrap()->run();
+    	
+    	$options['environment'] = $this->_environment;    	
+        $this->getBootstrap()->run($options);
     }    
 }
 

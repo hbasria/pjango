@@ -1,7 +1,7 @@
 <?php
 
 function get_mailer($mailer = false) {
-	require_once("class.phpmailer.php");
+	require_once("pjango/utils/phpmailer.php");
 	
 	$mail = new PHPMailer();
 	$mail->CharSet   =   pjango_ini_get('DEFAULT_CHARSET');

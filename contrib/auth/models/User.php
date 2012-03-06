@@ -12,6 +12,10 @@
  */
 class User extends BaseUser
 {
+    public static function get_content_type_id() {
+        return ContentType::get_for_model('User')->id;
+    }
+    
 	public static function findAllAsChoice() {
 		$choicesArr = Doctrine_Query::create()
 			->select('o.id, o.displayname')
@@ -25,6 +29,40 @@ class User extends BaseUser
 		
 		return $choices;
 	}
+	
+	public static function getEncryptedPassword($password = false){
+	    if (is_array($password)) $password = $password[0];
+	    return sha1($password.pjango_ini_get('SECRET_KEY'));
+	}
+	
+	public static function authenticate($username = false, $password = false, $userId = false){
+	    
+	    $q = Doctrine_Query::create()
+	        ->from('User u');
+	    
+	    if($userId){
+	        $q->addWhere('u.id = ? AND u.is_active = ?', array($userId,1));
+	    }else {
+	        $q->addWhere('u.password = ? AND u.is_active = ?', array($password,1));
+	        $q->addWhere('u.username = ? OR u.email = ?', array($username,$username));	         	        
+	    }
+	    
+	    $user = $q->fetchOne();
+	    
+	    if (!$user) throw new Exception(pjango_gettext('Authentication failed'));
+	    
+	    //cooki set et beni hatırla için
+	    if (isset($_POST['remember_me'])){
+	        $user->setCookie();
+	    }	
+
+	    $user->last_login = date('Y-m-d H:i:s');
+	    $user->save();
+	    
+	    $_SESSION['user'] = serialize($user);
+	    
+	    return $user;
+	}	
 	
 	function get_group_permissions() {
 		$permsArr = array();
@@ -63,7 +101,7 @@ class User extends BaseUser
 	}
 	
 	function has_perm($perm) {
-		if ($_SESSION['user']['is_superuser'] == 1) return true;
+		if ($this->is_superuser == 1) return true;
 		
 		$allPerm = $this->get_all_permissions();
 		
@@ -75,7 +113,7 @@ class User extends BaseUser
 	}
 	
 	function is_authenticated() {
-		if (isset($_SESSION['user']['id'])) return true;
+		if ($this->id > 0) return true;
 		else return false;
 	}
 	
@@ -86,43 +124,24 @@ class User extends BaseUser
 	}
 	
 	function changePassword($newPassword) {
-		$this->password = md5($newPassword);
+	    //FIXME istenilen şifreleme ile 
+		$this->password = self::getEncryptedPassword($newPassword);
 		$this->save();
 	}	
 
 	public function setCookie() {
-		
-		$expireTime = time()+(30 * 24 * 60 * 60);
-		
 		$pt = PjangoToken::make_token('User', $this->id);
-		$pt->expires = $expireTime;
 		$pt->save();
 		
 		setcookie("rme", $pt->token, $expireTime);
 	}	
 	
-	public static function getWithAllRelations($id) {
-		$obj = Doctrine_Query::create( )
-	    	->from('User u')   	
-	    	->where('u.id = ?', $id)
-	    	->fetchOne();		
-	    	
-		if($obj) return $obj;
-		else return false;		
-	}
-	
-	function get_username() {
-		$retVal = explode('@', $this->email);
-		return $retVal[0];
-	}
-	
-	function get_reference_count() {
-		$results = Doctrine_Query::create()
-			->from('User u')
-			->leftJoin('u.Tokens pt')
-			->where('u.reference_user_id = ? AND pt.status = ?', array($this->id, PjangoToken::STATUS_APPROVED));
-				
-		return count($results);
-	}
+	public function get_profile_url() {
+	    return '';
+	}	
+
+	public function get_profile_image() {	    
+	    return pjango_ini_get('MEDIA_URL').'/img/no-profile.jpg';
+	}	
 
 }

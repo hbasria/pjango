@@ -489,3 +489,16 @@ $GLOBALS['SETTINGS']['MESSAGE_STORAGE'] = 'django.contrib.messages.storage.user_
 
 # The list of directories to search for fixtures
 $GLOBALS['SETTINGS']['FIXTURE_DIRS'] = array();
+
+
+############
+# LOGGING #
+############
+$GLOBALS['SETTINGS']['LOGGING'] = array(
+	'handler'        => 'file',
+	'ident'          => 'ident',	
+    'name'           => sprintf('%s/log/out_%s.log', SITE_PATH, date('d-m-Y')),
+// 	'level'          => PEAR_LOG_DEBUG,
+	'mode'           => 0600, 
+	'timeFormat'     => '%X %x'
+);

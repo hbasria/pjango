@@ -9,11 +9,13 @@
  * @property string $taxonomy
  * @property string $name
  * @property integer $count
+ * @property integer $site_id
+ * @property Site $Site
  * @property Doctrine_Collection $Post
  * 
- * @package    {P}jango
+ * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
- * @author     Hasan Basri Ateş <hbasria@4net.com.tr>
+ * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 7490 2010-03-29 19:53:27Z jwage $
  */
 abstract class BasePostCategory extends Doctrine_Record
@@ -37,11 +39,18 @@ abstract class BasePostCategory extends Doctrine_Record
         $this->hasColumn('count', 'integer', null, array(
              'type' => 'integer',
              ));
+        $this->hasColumn('site_id', 'integer', null, array(
+             'type' => 'integer',
+             ));
     }
 
     public function setUp()
     {
         parent::setUp();
+        $this->hasOne('Site', array(
+             'local' => 'site_id',
+             'foreign' => 'id'));
+
         $this->hasMany('Post', array(
              'refClass' => 'PostCategories',
              'local' => 'category_id',

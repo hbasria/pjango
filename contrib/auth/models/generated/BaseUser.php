@@ -15,20 +15,14 @@
  * @property boolean $is_superuser
  * @property timestamp $last_login
  * @property date $date_joined
- * @property integer $contact_id
- * @property Contact $Contact
+ * @property integer $site_id
+ * @property Site $Site
  * @property Doctrine_Collection $Groups
  * @property Doctrine_Collection $Permissions
  * @property Doctrine_Collection $UserGroups
  * @property Doctrine_Collection $UserPermissions
- * @property Doctrine_Collection $Comment
  * @property Doctrine_Collection $Post
- * @property Doctrine_Collection $Policy
- * @property Doctrine_Collection $Account
- * @property Doctrine_Collection $Invoice
- * @property Doctrine_Collection $Event
- * @property Doctrine_Collection $MailList
- * @property Doctrine_Collection $Advert
+ * @property Doctrine_Collection $PjangoImage
  * 
  * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
@@ -79,19 +73,19 @@ abstract class BaseUser extends Doctrine_Record
              'type' => 'date',
              ));
         $this->hasColumn('contact_id', 'integer', null, array(
-             'type' => 'integer',
-             ));
-        $this->hasColumn('reference_user_id', 'integer', null, array(
                      'type' => 'integer',
         ));        
+        $this->hasColumn('site_id', 'integer', null, array(
+             'type' => 'integer',
+             ));
     }
 
     public function setUp()
     {
         parent::setUp();
-        //$this->hasOne('Contact', array(
-        //     'local' => 'contact_id',
-        //     'foreign' => 'id'));
+        $this->hasOne('Site', array(
+             'local' => 'site_id',
+             'foreign' => 'id'));
 
         $this->hasMany('Group as Groups', array(
              'refClass' => 'UserGroup',
@@ -110,13 +104,18 @@ abstract class BaseUser extends Doctrine_Record
         $this->hasMany('UserPermission as UserPermissions', array(
              'local' => 'id',
              'foreign' => 'user_id'));
-        
-        $this->hasOne('User as ReferenceUser', array(
-            'local' => 'reference_user_id',
-            'foreign' => 'id'));  
 
+            if (class_exists('Contact')) {
+            $this->hasOne('Contact', array(
+                        'local' => 'contact_id',
+                        'foreign' => 'id'));                        
+        }        
+        
+        if (class_exists('PjangoToken')) {
         $this->hasMany('PjangoToken as Tokens', array(
                      'local' => 'id',
                      'foreign' => 'object_id'));        
+        }
+
     }
 }

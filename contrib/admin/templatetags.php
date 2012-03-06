@@ -6,7 +6,12 @@ function recursive_call_user_func($obj, $objectArr){
 	array_shift($objectArr);
 	
 	if (count($objectArr) == 0){
-		$obj = $obj->{$tmpObj};
+	    try {
+	        //FIXME saglam bi cozum olmadi
+	        $obj = @call_user_func(array($obj, $tmpObj));
+	    } catch (Exception $e) {
+		    $obj = $obj->{$tmpObj};
+	    }
 	}else {
 		$obj = recursive_call_user_func($obj->{$tmpObj}, $objectArr);
 	}
@@ -75,16 +80,13 @@ class Result_List_Tag extends H2o_Node {
         
         $tableRowCellTemplate = '<td class="">%s</td>';
         
-        $resultRows = array();
-        
-        
+        $tableRows = array();
 
         foreach ($cl->result_list as $resultItem) {
         	
         	$identifier = implode('.', $resultItem->identifier());
         	
         	$tableRowCells = array('<td class="toggleSelection"><input type="checkbox" value="'.$identifier.'" /></td>');
-        	//$tableRowCells = array();
         
         	
 
@@ -113,14 +115,12 @@ class Result_List_Tag extends H2o_Node {
                 }
             }
 
-            $isFirstColumn = true;
         	foreach ($cl->list_display as $columnName) {
         		$columnNameArr = explode('__', $columnName);
+        		$cellTxt = '';
         		
         		
        		
-        		$cellTxt = '';
-        		
         		if(count($columnNameArr)>1){
         			$cellTxt = recursive_call_user_func($resultItem, $columnNameArr);
         		}else {
@@ -132,23 +132,16 @@ class Result_List_Tag extends H2o_Node {
         		}
 
         		$tableRowCells[] = sprintf($tableRowCellTemplate, $cellTxt);
-				/*if ($isFirstColumn){
-                    $tableRowCells[] = sprintf($tableRowCellTemplate, $cellTxt, implode(' | ', $rowActions));
-                }else {
-                	$tableRowCells[] = sprintf($tableRowCellTemplate, $cellTxt, '');
-                }*/
-        		
-                $isFirstColumn = false;
         	}
         	
         	$tableRowCells[] = sprintf('<td class="alignRight horizontalActions"><ul class="rowActions">%s</ul></td>', implode('', $rowActions));
         	
         	
-        	$resultRows[] = $tableRowCells;
+        	$tableRows[] = $tableRowCells;
         	
         }
         
-        $context['results'] = $resultRows;
+        $context['results'] = $tableRows;
         
         /*
         
@@ -399,64 +392,63 @@ class Admin_List_Filter_Tag extends H2o_Node {
 		
 		$model = $cl->get_model();
 		$filterArr = array();
+		$conn = Doctrine_Manager::connection();
 		
 		foreach ($cl->list_filter as $list_filter_value) {
 			$filter = array();
 			$filterKeyArr = explode('__', $list_filter_value); //Categories__name
+			
+
 				
 			if (count($filterKeyArr)>1){
-// 				$sq = Doctrine_Query::create()
-// 				->select('o.'.$list_filter_value_arr[1])
-// 				->from($list_filter_value_arr[0].' o')
-// 				->fetchArray();
+			    $filterKey = $list_filter_value; //status
+			    $filterKeyStr = ucfirst($filterKey); //Status
+			    
+// 				$q = Doctrine_Query::create()
+// 					->select('DISTINCT(f.'.$filterKeyArr[1].') AS filterKey')
+// 					->from($model.' o')
+// 					->leftJoin('o.'.$filterKeyArr[0].' f');
+				
+// 				$stmt = $conn->prepare($q->getSqlQuery());
+// 				$stmt->execute();
+// 				$selecboxData = $stmt->fetchAll();
+			}else {				    
+			    $filterKey = $list_filter_value; //status
+			    $filterKeyStr = ucfirst($filterKey); //Status			    
 
-				$selecboxData = Doctrine_Query::create()
-					->select('DISTINCT(o.'.$filterKeyArr[1].') AS '.$filterKeyArr[1])
-					->from($filterKeyArr[0].' o')
-					->fetchArray();			
-
-				print_r($selecboxData);
-		
-				
-		
-			}else {	
-				$filterKey = $list_filter_value; //status
-				$filterKeyStr = ucfirst($filterKey); //Status
-				
-				
-				//eğer filtreleme yapılmış ise
-				$selectedFilterKeyValue = isset($cl->params[$filterKey]) ? $cl->params[$filterKey] : false ;
-				
-				if ($selectedFilterKeyValue){
-					$filter['selected'] = ucfirst($selectedFilterKeyValue);
-				}else {
-					$filter['selected'] = 'All '.$filterKeyStr;
-				}	
-				
-	
-				
 				//filtrelenecek sütunun DISTINCT ile alınmış listesi
-				$selecboxData = Doctrine_Query::create()
-					->select('DISTINCT(o.'.$filterKey.') AS '.$filterKey)
-					->from($model.' o')
-					->fetchArray();		
-	
-				$selecboxDataArr = array(array(
-					'name'=>'All '.$filterKeyStr, 
-					'value'=>$cl->get_query_string(array(), array($filterKey))));
-	
-				foreach ($selecboxData as $selecboxDataItem) {
-					$selecboxItemName = ucfirst($selecboxDataItem[$filterKey]);				
-					$selecboxItemValue = $cl->get_query_string(array($filterKey=>$selecboxDataItem[$filterKey]));
-					$selecboxDataArr[] = array('name'=>$selecboxItemName, 'value'=>$selecboxItemValue);
-				}
-				
-				$filter['label'] = $filterKeyStr;
-				$filter['key'] = $filterKey;
-				$filter['selecbox_data'] = $selecboxDataArr;				
-				$filterArr[] = $filter;
+				$q = Doctrine_Query::create()
+					->select('DISTINCT(o.'.$filterKey.') AS filterKey')
+					->from($model.' o');
+			}
 			
-			}	
+			$stmt = $conn->prepare($q->getSqlQuery());
+			$stmt->execute();
+			$selecboxData = $stmt->fetchAll();			
+			
+			$selecboxDataArr = array(array(
+								'name'=>'All '.$filterKeyStr, 
+								'value'=>$cl->get_query_string(array(), array($filterKey))));
+			
+			foreach ($selecboxData as $selecboxDataItem) {
+			    $selecboxItemName = ucfirst($selecboxDataItem[0]);
+			    $selecboxItemValue = $cl->get_query_string(array($filterKey=>$selecboxDataItem[0]));
+			    $selecboxDataArr[] = array('name'=>$selecboxItemName, 'value'=>$selecboxItemValue);
+			}			
+			
+			//eğer filtreleme yapılmış ise
+			$selectedFilterKeyValue = isset($cl->params[$filterKey]) ? $cl->params[$filterKey] : false ;
+			
+			if ($selectedFilterKeyValue){
+			    $filter['selected'] = ucfirst($selectedFilterKeyValue);
+			}else {
+			    $filter['selected'] = 'All '.$filterKeyStr;
+			}			
+			
+			$filter['label'] = $filterKeyStr;
+			$filter['key'] = $filterKey;
+			$filter['selecbox_data'] = $selecboxDataArr;
+			$filterArr[] = $filter;			
 		}	
 		
 		$retVal = array();
@@ -479,7 +471,59 @@ class Admin_List_Filter_Tag extends H2o_Node {
 	}
 }
 
+class Account_Switcher_Tag extends H2o_Node {
+
+    function __construct($argstring, $parser, $position = 0) {
+        $this->args = H2o_Parser::parseArguments($argstring);
+    }
+
+    function render($context, $stream) {
+        
+        
+        $html = '<li class="accountSwitcher">
+        <div class="triggerContainer">
+        <div class="switchTrigger">%s</div>
+        <a accesskey="w" href="#"><u>W</u>orking as</a>
+        </div>
+        <div class="accountsPanel">
+        <div class="switchTop">&nbsp;</div>
+        <div class="switchMiddle">
+        <div class="switchMiddleBody">
+        <div class="label">Switch to</div>
+        <div id="accountLoading"></div>
+        <div class="result">
+        <div>
+        <ul id="accounts">
+        <li style="display: none"></li>
+        %s
+        </ul>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="switchDown">&nbsp;</div>
+        </div>
+        </li>';
+        
+        $sites = Doctrine_Query::create()
+            ->from('Site s')
+            ->execute();        
+
+        $sitesArr = array();
+        $selectedsiteName = '';
+        $siteId = pjango_ini_get('SITE_ID');
+        foreach ($sites as $value) {
+            $sitesArr[] = sprintf('<li><a href="?site=%d">%s</a></li>', $value->id, $value->name);
+            
+            if($siteId == $value->id) $selectedsiteName = $value->name;
+        }
+         
+        $stream->write(sprintf($html, $selectedsiteName, implode('', $sitesArr)));        
+    }
+}
+
 H2o::addTag(array('result_list'));
 H2o::addTag(array('get_admin_menu'));
 H2o::addTag(array('get_admin_submenu'));
 H2o::addTag(array('admin_list_filter'));
+H2o::addTag(array('account_switcher'));

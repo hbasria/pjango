@@ -7,10 +7,12 @@
  * 
  * @property integer $id
  * @property string $name
+ * @property integer $site_id
+ * @property Site $Site
  * @property Doctrine_Collection $Permissions
  * @property Doctrine_Collection $GroupPermissions
  * @property Doctrine_Collection $Users
- * @property Doctrine_Collection $UserGroups
+ * @property Doctrine_Collection $GroupUsers
  * 
  * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
@@ -31,11 +33,18 @@ abstract class BaseGroup extends Doctrine_Record
              'type' => 'string',
              'length' => '100',
              ));
+        $this->hasColumn('site_id', 'integer', null, array(
+             'type' => 'integer',
+             ));
     }
 
     public function setUp()
     {
         parent::setUp();
+        $this->hasOne('Site', array(
+             'local' => 'site_id',
+             'foreign' => 'id'));
+
         $this->hasMany('Permission as Permissions', array(
              'refClass' => 'GroupPermission',
              'local' => 'group_id',
@@ -50,7 +59,7 @@ abstract class BaseGroup extends Doctrine_Record
              'local' => 'group_id',
              'foreign' => 'user_id'));
 
-        $this->hasMany('UserGroup as UserGroups', array(
+        $this->hasMany('UserGroup as GroupUsers', array(
              'local' => 'id',
              'foreign' => 'group_id'));
     }

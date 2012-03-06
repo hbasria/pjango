@@ -50,17 +50,39 @@ abstract class BasePjangoImage extends Doctrine_Record
         $this->hasColumn('object_id', 'integer', null, array(
              'type' => 'integer',
              ));
+        $this->hasColumn('site_id', 'integer', null, array(
+                     'type' => 'integer',
+        ));        
         $this->hasColumn('content_type_id', 'integer', null, array(
              'type' => 'integer',
              ));
+        $this->hasColumn('created_by', 'integer', null, array(
+                     'type' => 'integer',
+        ));
+        $this->hasColumn('updated_by', 'integer', null, array(
+                     'type' => 'integer',
+        ));
     }
 
     public function setUp()
     {
         parent::setUp();
+        
+        $this->hasOne('User as CreatedBy', array(
+                     'local' => 'created_by',
+                     'foreign' => 'id'));
+        
+        $this->hasOne('User as UpdatedBy', array(
+                     'local' => 'updated_by',
+                     'foreign' => 'id'));
+                
         $this->hasOne('ContentType', array(
              'local' => 'content_type_id',
              'foreign' => 'id'));
+        
+        $this->hasOne('Site', array(
+                     'local' => 'site_id',
+                     'foreign' => 'id'));        
 
         $timestampable0 = new Doctrine_Template_Timestampable();
         $this->actAs($timestampable0);

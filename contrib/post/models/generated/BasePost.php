@@ -19,16 +19,20 @@
  * @property integer $comment_count
  * @property integer $weight
  * @property string $template
- * @property integer $author_id
  * @property integer $parent_id
+ * @property integer $updated_by
+ * @property integer $created_by
+ * @property integer $site_id
+ * @property Site $Site
+ * @property User $CreatedBy
+ * @property User $UpdatedBy
  * @property Post $Parent
- * @property User $Author
  * @property Doctrine_Collection $Categories
  * @property Doctrine_Collection $Post
  * 
- * @package    {P}jango
+ * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
- * @author     Hasan Basri Ateş <hbasria@4net.com.tr>
+ * @author     ##NAME## <##EMAIL##>
  * @version    SVN: $Id: Builder.php 7490 2010-03-29 19:53:27Z jwage $
  */
 abstract class BasePost extends Doctrine_Record
@@ -87,10 +91,16 @@ abstract class BasePost extends Doctrine_Record
              'type' => 'string',
              'length' => '255',
              ));
-        $this->hasColumn('author_id', 'integer', null, array(
+        $this->hasColumn('parent_id', 'integer', null, array(
              'type' => 'integer',
              ));
-        $this->hasColumn('parent_id', 'integer', null, array(
+        $this->hasColumn('updated_by', 'integer', null, array(
+             'type' => 'integer',
+             ));
+        $this->hasColumn('created_by', 'integer', null, array(
+             'type' => 'integer',
+             ));
+        $this->hasColumn('site_id', 'integer', null, array(
              'type' => 'integer',
              ));
     }
@@ -98,12 +108,20 @@ abstract class BasePost extends Doctrine_Record
     public function setUp()
     {
         parent::setUp();
-        $this->hasOne('Post as Parent', array(
-             'local' => 'parent_id',
+        $this->hasOne('Site', array(
+             'local' => 'site_id',
              'foreign' => 'id'));
 
-        $this->hasOne('User as Author', array(
-             'local' => 'author_id',
+        $this->hasOne('User as CreatedBy', array(
+             'local' => 'created_by',
+             'foreign' => 'id'));
+
+        $this->hasOne('User as UpdatedBy', array(
+             'local' => 'updated_by',
+             'foreign' => 'id'));
+
+        $this->hasOne('Post as Parent', array(
+             'local' => 'parent_id',
              'foreign' => 'id'));
 
         $this->hasMany('PostCategory as Categories', array(

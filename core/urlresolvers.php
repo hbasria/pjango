@@ -121,27 +121,23 @@ class RegexURLPattern {
 
 
 function reverse($viewname = '') {
-    $path = explode('.', $viewname);  
+    $path = explode('.', $viewname);
     $path = implode("/", $path);
     
+    $includePaths = explode(':', get_include_path());
+    $includePaths = array_reverse($includePaths);
+    
     $returnPath = false;
+    foreach ($includePaths as $includePathItem) {
+        $tmpPath = $includePathItem.'/'.$path;
     
-    $tmpPath = APPLICATION_PATH.'/lib/'.$path;
-    if(is_dir($tmpPath)){       
-        $returnPath = $tmpPath;
-    }
+        if(is_dir($tmpPath)){
+            $returnPath = $tmpPath;
+        }
     
-    if(is_file($tmpPath.'.php')){       
-        $returnPath = $tmpPath.'.php';
-    }
-    
-    $tmpPath = APPLICATION_PATH.'/apps/'.$path;
-    if(is_dir($tmpPath)){       
-        $returnPath = $tmpPath;
-    }
-    
-    if(is_file($tmpPath.'.php')){       
-        $returnPath = $tmpPath.'.php';
+        if(is_file($tmpPath.'.php')){
+            $returnPath = $tmpPath.'.php';
+        }    
     }
     
     return $returnPath;	

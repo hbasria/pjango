@@ -17,7 +17,12 @@ PostCategory:
                 
         taxonomy: string(35)   
         name: string(100)  
-        count: integer         
+        count: integer
+        site_id: integer
+    relations:
+        Site:
+            local: site_id
+            foreign: id                
 
 Post:
     actAs:
@@ -48,16 +53,25 @@ Post:
         weight: integer
         template: string(255)
         
-        author_id: integer
         parent_id: integer
+        updated_by: integer    
+        created_by: integer          
+        site_id: integer
     relations:
+        Site:
+            local: site_id
+            foreign: id      
+        CreatedBy:
+            class: User
+            local: created_by
+            foreign: id
+        UpdatedBy:
+            class: User
+            local: updated_by
+            foreign: id                      
         Parent:
             class: Post
             local: parent_id
-            foreign: id
-        Author:
-            class: User
-            local: author_id
             foreign: id
         Categories:
             class: PostCategory

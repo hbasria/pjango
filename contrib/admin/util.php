@@ -16,6 +16,7 @@ define('TO_FIELD_VAR', 't');
 define('IS_POPUP_VAR', 'pop');
 define('RESPONSE_TYPE_VAR', 'responsetype');
 define('ERROR_FLAG', 'e');
+define('SITE_VAR', 'site');
 
 /*
 $q = Doctrine_Query::create()
@@ -75,11 +76,11 @@ class ChangeList {
     public $list_select_related = false;
     public $list_per_page = false;
     public $list_editable = array();
-    public $search_fields = array();
+    public $search_fields = false;
     public $date_hierarchy = false;
     public $save_as = false;
     public $save_on_top = false;
-    public $ordering = 'id';
+    public $ordering = false;
     public $actions = array();    	
     public $row_actions = array();
 	
@@ -87,8 +88,8 @@ class ChangeList {
     public $show_all;
     public $is_popup;
     public $params;
-    public $order_field = 'id';
-    public $order_type = 'asc'; 
+    public $order_field = false;
+    public $order_type = false; 
     public $query; 
     public $query_set; 
     public $chunk_length = 5;
@@ -152,19 +153,17 @@ class ChangeList {
     	
         $this->params = $_GET;
         
-        $_ordering = $this->get_ordering();
-        $this->order_field = $_ordering[0];
-        $this->order_type = $_ordering[1];
-        
-        
+
     	$this->query_set = $q;
         $this->query = isset($this->params[SEARCH_VAR]) ? $this->params[SEARCH_VAR] : '';
     	$this->page_num = isset($this->params[PAGE_VAR]) ? $this->params[PAGE_VAR] : 1;
+    	$this->order_field = isset($this->params[ORDER_VAR]) ? $this->params[ORDER_VAR] : false;
+    	$this->order_type = isset($this->params[ORDER_TYPE_VAR]) ? $this->params[ORDER_TYPE_VAR] : false;    	 
         $this->show_all = in_array(ALL_VAR, $this->params);
         $this->is_popup = in_array(IS_POPUP_VAR, $this->params);
         $this->to_field = isset($this->params[TO_FIELD_VAR]) ? $this->params[TO_FIELD_VAR] : false;
 
-        foreach (array(ALL_VAR, ORDER_VAR, ORDER_TYPE_VAR, PAGE_VAR, SEARCH_VAR, TO_FIELD_VAR, IS_POPUP_VAR, ERROR_FLAG, LANG_VAR, RESPONSE_TYPE_VAR) as $value) {
+        foreach (array(ALL_VAR, ORDER_VAR, ORDER_TYPE_VAR, PAGE_VAR, SEARCH_VAR, TO_FIELD_VAR, IS_POPUP_VAR, ERROR_FLAG, LANG_VAR, RESPONSE_TYPE_VAR, SITE_VAR) as $value) {
         	if (isset($this->params[$value])) unset($this->params[$value]);
         }
         
@@ -173,29 +172,27 @@ class ChangeList {
     }
     
     function get_ordering() {
+        $orderingStr = false;
+        
+        if(!$this->order_field && $this->ordering){
+            if (is_string($this->ordering)) $orderingStr = $this->ordering;
+            if (is_array($this->ordering)) $orderingStr = $this->ordering[0];
+       	    
+    		if (substr($orderingStr, 0,1) == '-'){
+    			$this->order_field = substr($orderingStr, 1, strlen($orderingStr));
+    			$this->order_type = 'desc';
+        	}else{
+        		$this->order_field = $orderingStr;
+        		$this->order_type = 'asc';
+        	}                 
+        }
     	
-    	if (is_string($this->model_admin->ordering)) $this->ordering = $this->model_admin->ordering;
-    	if (is_array($this->model_admin->ordering)) $this->ordering = $this->model_admin->ordering[0];    	
+    	if($this->order_field)
+    	    return array($this->order_field, $this->order_type);
+    	else return false;
+    	
+    	
 
-		if (substr($this->ordering, 0,1) == '-'){
-			$this->order_field = substr($this->ordering, 1, strlen($this->ordering));
-			$this->order_type = 'desc';
-    	}else{
-    		$this->order_field = $this->ordering;
-    		$this->order_type = 'asc';
-    	}
-    	
-    	
-
-    	if (isset($this->params[ORDER_VAR])){    		
-    		$this->order_field = $this->params[ORDER_VAR];
-    	}
-    	
-    	if (isset($this->params[ORDER_TYPE_VAR])){    		
-    		$this->order_type = $this->params[ORDER_TYPE_VAR];
-    	}
-    	
-        return array($this->order_field, $this->order_type);
     }
     
     function get_query_set() {
@@ -218,10 +215,14 @@ class ChangeList {
     	}
     	
     	# Set ordering.    	
-    	if ($this->order_field){
-    		$this->query_set->orderBy($this->order_field.' '.$this->order_type);
+    	$ordering = $this->get_ordering();
+    	
+    	if ($ordering){
+    		$this->query_set->orderBy($ordering[0].' '.$ordering[1]);
     	}
 
+    	if($this->search_fields){
+    	    
         if (isset($_POST[SEARCH_VAR]) || isset($_GET[SEARCH_VAR])){
             
         	$searchQ = isset($_POST[SEARCH_VAR]) ? $_POST[SEARCH_VAR] : '';
@@ -246,22 +247,7 @@ class ChangeList {
         	$this->query_set->addWhere('('.implode(' OR ', $searchFields).')');
         }
         
-        
-        //Ordering date_hierarchy$q->orderBy($orderby)
-		/*
-        $ordering = array();
-        if (is_string($this->date_hierarchy)){
-            if (substr($this->date_hierarchy, 0,1) == '-'){
-        	   $ordering[] = substr($this->date_hierarchy, 1, strlen($this->date_hierarchy)).' DESC';
-        	}else{
-        		$ordering[] = $this->date_hierarchy.' ASC';
-        	}
-        }
-        
-        if (count($ordering)>0){
-        	$this->query_set->orderBy(implode(', ', $ordering));
-        }
-        */
+    	}
         
         
         return $this->query_set;

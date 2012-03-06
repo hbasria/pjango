@@ -6,45 +6,70 @@ require_once 'pjango/http.php';
 class PostViews {
 	
 	function admin_index($request) {
-		$uriArr = explode('/', $_SERVER["REQUEST_URI"]);
-		$taxonomy = $uriArr[count($uriArr)-2];
+		$uriArr = explode('/', getRequestUri());
+		$taxonomy = $uriArr[count($uriArr)-3];
 		
 		$templateArr = array('current_admin_menu'=>$taxonomy, 
-				'current_admin_submenu'=>$taxonomy); 
+				'current_admin_submenu'=>$taxonomy,
+				'current_admin_submenu2'=>'Post'); 
+		
+		$className = ucfirst($taxonomy);
+		$adminClassName = $className.'Admin';
 		
 		$q = Doctrine_Query::create()
 		    ->from('Post o')
 		    ->leftJoin('o.Translation t')
-		    ->where('o.post_type = ?', array($taxonomy));
-		    
-		$cl = new ChangeList($q);
-		$templateArr['cl'] = $cl;		
-		        
+		    ->leftJoin('o.Categories c')
+			->leftJoin('c.Translation ct')
+		    ->where('o.site_id = ? AND o.post_type = ?', array(pjango_ini_get('SITE_ID'), $taxonomy));
+
+		if(class_exists($adminClassName)){
+			$adminClass = new $adminClassName();
+				
+			$cl = new ChangeList($q, 
+					$adminClass->list_display, 
+					$adminClass->list_display_links, 
+					$adminClass->list_filter, 
+					$adminClass->date_hierarchy, 
+					$adminClass->search_fields, 
+					$adminClass->list_per_page, 
+					$adminClass->row_actions);
+		}else {
+			$cl = new ChangeList($q);
+		}
+
+		$templateArr['cl'] = $cl;		      
 		render_to_response('admin/change_list.html', $templateArr);
 	}
 	
 	function admin_addchange($request, $id = false) {
-		$uriArr = explode('/', $_SERVER["REQUEST_URI"]);
+		$uriArr = explode('/', getRequestUri());
 		
-		if ($uriArr[count($uriArr)-2] == 'add'){
-			$taxonomy = $uriArr[count($uriArr)-3];
-		}elseif ($uriArr[count($uriArr)-2] == 'edit'){
+		if ($uriArr[count($uriArr)-3] == 'add'){
 			$taxonomy = $uriArr[count($uriArr)-4];
+		}elseif ($uriArr[count($uriArr)-3] == 'edit'){
+			$taxonomy = $uriArr[count($uriArr)-5];
 		}else{
 			$taxonomy = 'post';
 		}
-		
-		$templateArr = array('current_admin_menu'=>$taxonomy, 
-				'current_admin_submenu'=>$taxonomy, 
-				'title'=>pjango_gettext($taxonomy));
+
+		$templateArr = array('current_admin_menu'=>$taxonomy,
+						'current_admin_submenu'=>$taxonomy, 
+						'current_admin_submenu2'=>'Post',
+						'title'=>pjango_gettext($taxonomy));
 		
 		$modelClass = 'Post';
-		$formClass = $modelClass.'Form';
-		
+		$formClass = $modelClass.'Form';	
+
 		if (class_exists(ucfirst($taxonomy).'Form')) {
-			$formClass = $taxonomy.'Form';
-		}
+		    $formClass = ucfirst($taxonomy).'Form';
+		}		
 		
+		$templateArr['third_level_navigation'] = array(
+		    array('name'=>pjango_gettext(ucfirst($taxonomy).' properties'),
+		    		'url'=>pjango_ini_get('SITE_URL').'/admin/'.$taxonomy,'class'=>'active'),
+		);		
+
 		$formData = array();	
 		$contentType = ContentType::get_for_model($modelClass);
 		
@@ -85,8 +110,7 @@ class PostViews {
 
 			try {
 				
-				if (!$form->is_valid()) {
-					
+				if (!$form->is_valid()) {					
 					throw new Exception('Hataları kontrol ederek tekrar deneyin.');
 				}
 				
@@ -102,26 +126,21 @@ class PostViews {
 				$addchangeObj->Translation[$lng]->excerpt = stripslashes($request->POST['excerpt']);
 				$addchangeObj->Translation[$lng]->slug = stripslashes($request->POST['slug']);
 				$addchangeObj->post_type = $taxonomy;
-				$addchangeObj->Author = $request->user;
-				
+				$addchangeObj->site_id = pjango_ini_get('SITE_ID');
+				$addchangeObj->created_by = $request->user->id;				
 				
 				$addchangeObj->unlink('Categories');
 				$addchangeObj->link('Categories', $formData['categories']);
 				$addchangeObj->save();
 				
-				$metaKeys = array('images');
-				PjangoMeta::setMeta($contentType->id, $addchangeObj->id, $metaKeys, $formData);
-	
-	
+				PjangoMeta::setMeta($contentType->id, $addchangeObj->id, false, $request->POST);
 				Messages::Info(pjango_gettext('The operation completed successfully'));
-				HttpResponseRedirect('/admin/'.$taxonomy.'/');
+				HttpResponseRedirect('/admin/'.$taxonomy.'/'.$modelClass.'/');
 			} catch (Exception $e) {
 				Messages::Error($e->getMessage());
 				
 				
 			}
-		
-			
 		}		
         
         if (!$form) $form = new $formClass($taxonomy, $formData);
@@ -160,28 +179,11 @@ class PostViews {
     } 
 	
 	
-	function admin_categories($request) {
-		$uriArr = explode('/', $_SERVER["REQUEST_URI"]);
-		$taxonomy = $uriArr[count($uriArr)-3];
 
-		$templateArr = array('current_admin_menu'=>$taxonomy, 
-				'current_admin_submenu'=>$taxonomy,
-				'current_admin_submenu2'=>'categories'); 
-		
-		$q = Doctrine_Query::create()
-		    ->from('PostCategory o')
-		    ->leftJoin('o.Translation t')
-		    ->where('o.taxonomy = ?', $taxonomy);
-		
-		$cl = new ChangeList($q);
-		$templateArr['cl'] = $cl;		
- 
-		render_to_response('admin/change_list.html', $templateArr);
-	}	
 	
 	function admin_category_addchange($request, $id = false) {
 		
-		$uriArr = explode('/', $_SERVER["REQUEST_URI"]);
+		$uriArr = explode('/', getRequestUri());
 		
 		if ($uriArr[count($uriArr)-2] == 'add'){
 			$taxonomy = $uriArr[count($uriArr)-4];
@@ -193,7 +195,7 @@ class PostViews {
 		
 		$templateArr = array('current_admin_menu'=>$taxonomy, 
 				'current_admin_submenu'=>$taxonomy,
-				'current_admin_submenu2'=>'categories'); 
+				'current_admin_submenu2'=>'PostCategory'); 
 		
 		$formData = array();
 		$modelClass = 'PostCategory';
@@ -210,7 +212,8 @@ class PostViews {
 		
 		if ($catTest<=0){
 			$category = new PostCategory();
-			$category->Translation[$lng]->name = $taxonomy.' Ana Kategori';
+			$category->Translation[$lng]->name = $taxonomy.pjango_gettext('Main Category');	
+			$category->site_id = pjango_ini_get('SITE_ID');			
 			$category->taxonomy = $taxonomy;
 			$category->save();
 			$treeObject = Doctrine_Core::getTable('PostCategory')->getTree();
@@ -249,18 +252,9 @@ class PostViews {
 				
 				try {
 					$parent = Doctrine::getTable($modelClass)->find($formData['parent_id']);
-					
-					if (!$parent){
-						$parent = new PostCategory();
-						$parent->Translation[$lng]->name = $taxonomy.' Ana Kategori';
-						$parent->taxonomy = $taxonomy;
-						$parent->save();
-						$treeObject = Doctrine_Core::getTable('PostCategory')->getTree();
-						$treeObject->createRoot($parent);						
-					}
-				
 
 					$addchangeObj->taxonomy = $taxonomy;
+					$addchangeObj->site_id = pjango_ini_get('SITE_ID');
 					$addchangeObj->Translation[$lng]->name = $formData['name'];
 					$addchangeObj->Translation[$lng]->slug = $formData['slug'];
 						
@@ -275,8 +269,6 @@ class PostViews {
 							
 						}
 					}
-						
-					
 				
 					Messages::Info(pjango_gettext('The operation completed successfully'));
 					HttpResponseRedirect('/admin/'.$taxonomy.'/categories/');
@@ -285,10 +277,6 @@ class PostViews {
 					Messages::Error($e->getMessage());
 				}				
 			}
-
-			
-
-			
 		}
 		
 		if (!$form) $form = new $formClass($taxonomy, $formData);

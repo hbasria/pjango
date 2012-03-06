@@ -11,9 +11,9 @@
  * @property integer $content_type_id
  * @property ContentType $ContentType
  * @property Doctrine_Collection $Groups
- * @property Doctrine_Collection $GroupPermissions
+ * @property Doctrine_Collection $PermissionGroups
  * @property Doctrine_Collection $Users
- * @property Doctrine_Collection $UserPermissions
+ * @property Doctrine_Collection $PermissionUsers
  * 
  * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
@@ -55,7 +55,7 @@ abstract class BasePermission extends Doctrine_Record
              'local' => 'permission_id',
              'foreign' => 'group_id'));
 
-        $this->hasMany('GroupPermission as GroupPermissions', array(
+        $this->hasMany('GroupPermission as PermissionGroups', array(
              'local' => 'id',
              'foreign' => 'permission_id'));
 
@@ -64,7 +64,7 @@ abstract class BasePermission extends Doctrine_Record
              'local' => 'permission_id',
              'foreign' => 'user_id'));
 
-        $this->hasMany('UserPermission as UserPermissions', array(
+        $this->hasMany('UserPermission as PermissionUsers', array(
              'local' => 'id',
              'foreign' => 'permission_id'));
     }

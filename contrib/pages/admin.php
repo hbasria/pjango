@@ -10,7 +10,7 @@ class PagesAdmin extends ModelAdmin {
     	    $this->admin_menu = array('pages', pjango_gettext('Pages'), '/admin/pages/Post/',
     			array('pages', pjango_gettext('Pages'), '/admin/pages/Post/',
     	            array('Post', pjango_gettext('Pages'), '/admin/pages/Post/'),
-    			array('categories', pjango_gettext('Categories'), '/admin/pages/categories/')));
+    			    array('PostCategory', pjango_gettext('Categories'), '/admin/pages/PostCategory/')));
         }        
 
         $this->row_actions = array('edit', 'delete');    								

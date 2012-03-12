@@ -45,9 +45,9 @@ class PostViews {
 	function admin_addchange($request, $id = false) {
 		$uriArr = explode('/', getRequestUri());
 		
-		if ($uriArr[count($uriArr)-3] == 'add'){
+		if ($uriArr[count($uriArr)-2] == 'add'){
 			$taxonomy = $uriArr[count($uriArr)-4];
-		}elseif ($uriArr[count($uriArr)-3] == 'edit'){
+		}elseif ($uriArr[count($uriArr)-2] == 'edit'){
 			$taxonomy = $uriArr[count($uriArr)-5];
 		}else{
 			$taxonomy = 'post';
@@ -178,7 +178,40 @@ class PostViews {
         HttpResponseRedirect('/admin/'.$taxonomy.'/');        
     } 
 	
-	
+    function admin_category_index($request) {
+        $uriArr = explode('/', getRequestUri());
+        $taxonomy = $uriArr[count($uriArr)-3];
+        $className = $uriArr[count($uriArr)-2];
+        $adminClassName = $className.'Admin';
+        
+        $templateArr = array('current_admin_menu'=>$taxonomy,
+        				'current_admin_submenu'=>$taxonomy,
+        				'current_admin_submenu2'=>$className); 
+        
+        $q = Doctrine_Query::create()
+            ->from($className.' o')
+            ->leftJoin('o.Translation t')
+            ->where('o.site_id = ? AND o.taxonomy = ?', array(pjango_ini_get('SITE_ID'), $taxonomy));
+        
+        if(class_exists($adminClassName)){
+            $adminClass = new $adminClassName();
+        
+            $cl = new ChangeList($q,
+            $adminClass->list_display,
+            $adminClass->list_display_links,
+            $adminClass->list_filter,
+            $adminClass->date_hierarchy,
+            $adminClass->search_fields,
+            $adminClass->list_per_page,
+            $adminClass->row_actions);
+        }else {
+            $cl = new ChangeList($q);
+        }
+        
+        $templateArr['cl'] = $cl;
+        render_to_response('admin/change_list.html', $templateArr);        
+        
+    }
 
 	
 	function admin_category_addchange($request, $id = false) {
@@ -271,7 +304,7 @@ class PostViews {
 					}
 				
 					Messages::Info(pjango_gettext('The operation completed successfully'));
-					HttpResponseRedirect('/admin/'.$taxonomy.'/categories/');
+					HttpResponseRedirect('/admin/'.$taxonomy.'/'.$modelClass.'/');
 				
 				} catch (Exception $e) {
 					Messages::Error($e->getMessage());

@@ -114,7 +114,7 @@ class FilemanagerViews {
 	    $uploadsPath = APPLICATION_PATH.'/media/uploads/';
 	    
 	    $siteUrl = pjango_ini_get('SITE_URL');
-	    $mediaUrl = pjango_ini_get('MEDIA_URL').'/uploads/';
+	    $mediaUrl = '/media/uploads/';
 	    
 	 
 	    

@@ -171,7 +171,7 @@ class FilemanagerViews {
 							'file'     => substr($file, strlen($uploadsPath)),
 							'filename' => basename($file),
 							'size'     => round(substr($size, 0, strpos($size, '.') + 4), 2) . $suffix[$i],
-							'thumb'    => $siteUrl.'/thumb/'.$mediaUrl.$fileName
+							'thumb'    => $siteUrl.'/thumb'.$mediaUrl.$fileName
 	                );
 	            }
 	        }

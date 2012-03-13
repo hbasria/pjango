@@ -2,11 +2,12 @@
 require_once 'pjango/shortcuts.php';
 require_once 'pjango/contrib/admin/util.php';
 require_once 'pjango/http.php';
+require_once 'pjango/utils/phpthumb.php';
+
 
 class CoreViews {
     
     function thumb($request, $url = false) {
-        require_once 'PhpThumb.php';
         header("Content-Type: image/png");
         header("Cache-Control: private, max-age=10800, pre-check=10800");
         header("Pragma: private");

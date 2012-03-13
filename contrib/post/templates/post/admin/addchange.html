@@ -17,8 +17,9 @@
     <link rel="stylesheet"  href="{{ ADMIN_MEDIA_URL }}/css/players.css" type="text/css" >
 	<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/ckeditor/ckeditor.js"></script>
 	<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/ckeditor/config.js"></script>
+	<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/filemanager/filemanager.js"></script>
 	<script type="text/javascript" src="{{ ADMIN_MEDIA_URL }}/js/jquery.slugify.js"></script>
-
+	
 	<script type="text/javascript"><!--
 	$(document).ready(function(){
 		CKEDITOR.replace('id_content', {
@@ -79,8 +80,14 @@
         <div class="shadedPanel">   
             <h3>{% trans "Default Image" %}</h3>
             <div class="shadedPanel_element">               
-                <input type="hidden" id="meta_image" name="meta_image" value="{{ addchange_obj.get_image }}" />
-                <img id="meta_image_preview" class="image"  src="{{ SITE_URL }}/thumb{{ addchange_obj.get_image }}" onclick="image_upload('meta_image', 'meta_image_preview');" width="100px" />
+                {% if addchange_obj %}
+                    <input type="hidden" id="meta_image" name="meta_image" value="{{ addchange_obj.get_image }}" />
+                    <img id="meta_image_preview" class="image"  src="{{ SITE_URL }}/thumb{{ addchange_obj.get_image }}" onclick="image_upload('meta_image', 'meta_image_preview');" width="100px" />
+                {% else %}
+                    <input type="hidden" id="meta_image" name="meta_image" value="" />
+                    <img id="meta_image_preview" class="image"  src="{{ ADMIN_MEDIA_URL }}/img/no-image.jpg" onclick="image_upload('meta_image', 'meta_image_preview');" width="100px" />
+                {% endif %}
+                
             </div>
                     
        

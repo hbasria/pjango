@@ -1,7 +1,0 @@
-{% for comment_item in comments%}
-<p><span class="ui-icon ui-icon-comment" style="margin: 0 2px 0 2px; float:left;"></span> 
-<b>{{ comment_item.get_displayname }}</b> {{ comment_item.submit_date|date 'j F Y' }}<br/>
-{{ comment_item.comment }}
-</p>
-{% endfor %}
-

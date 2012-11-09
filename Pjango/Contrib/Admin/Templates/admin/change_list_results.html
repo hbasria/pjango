@@ -1,0 +1,25 @@
+{% if results %}
+<table cellspacing="0" summary="" class="datatable">
+    <thead>
+        <tr>
+            <th class="first toggleAll"><input type="checkbox" id="toggleAll"/></th>
+            {% for header in result_headers %}
+                <th>
+                {% if header.sortable %}<a href="{{ header.url }}">{% endif %}
+                {{ header.text }}
+                {% if header.sortable %}</a>{% endif %}
+                </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+    	{% for result in results %}
+        <tr class="{% cycle "even", "odd" %}">
+        	{% for item in result %}{{ item }}{% endfor %}            
+        </tr> 
+        {% endfor %}            
+    </tbody>
+</table>
+
+<p class="paginator">{{ cl.paginator_display }}</p>
+{% endif %}

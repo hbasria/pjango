@@ -1,0 +1,82 @@
+# translation of pjango.po to Turkish
+# This file is distributed under the same license as the Pjango package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Pjango\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-05-02 01:05+0300\n"
+"PO-Revision-Date: 2010-05-02 01:06+0300\n"
+"Last-Translator: Hasan Basri Ates <hbasria@4net.com.tr>\n"
+"Language-Team: Turkish <info@4net.com.tr>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Main Category"
+msgstr "Ana Kategori"
+
+msgid "Main Category"
+msgstr "ana-kategori"
+
+msgid "Categories"
+msgstr "Kategoriler"
+
+msgid "Get Name"
+msgstr "Adı"
+
+msgid "Get Title"
+msgstr "Başlık"
+
+msgid "Get Slug"
+msgstr "Slug"
+
+msgid "Status"
+msgstr "Durumu"
+
+msgid "Created At"
+msgstr "Ek. Tarihi"
+
+msgid "Updated At"
+msgstr "Gün. Tarihi"
+
+msgid "post.categories"
+msgstr "Kategori"
+
+msgid "post.status"
+msgstr "Durum"
+
+msgid "post.title"
+msgstr "Başlık"
+
+msgid "post.slug"
+msgstr "Slug"
+
+msgid "post.excerpt"
+msgstr "Kısa İçerik"
+
+msgid "post.content"
+msgstr "İçerik"
+
+msgid "post.template"
+msgstr "Özel Template"
+
+msgid "post.weight"
+msgstr "Sıra No"
+
+msgid "Draft"
+msgstr "Geçici"
+
+msgid "Published"
+msgstr "Yayınlandı"
+
+msgid "Private"
+msgstr "Özel"
+
+msgid "Archive"
+msgstr "Arşiv"
+
+msgid ""
+msgstr ""

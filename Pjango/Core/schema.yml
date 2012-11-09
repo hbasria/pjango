@@ -1,0 +1,118 @@
+Site:
+    tableName: pjango_site
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true   
+        site_type: string(35)
+        domain: string(100) 
+        name: string(100)        
+        status: string(35)
+
+Settings:
+    tableName: pjango_settings
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true   
+        name: string(255) 
+        value: string
+        description: string
+        category: string(255)
+        
+        site_id: integer
+    relations:
+        Site:
+            local: site_id
+            foreign: id             
+
+PjangoMeta:  
+    tableName: pjango_meta
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true 
+        meta_key: string(255)
+        meta_value: string               
+        object_id: integer
+        content_type_id: integer
+        site_id: integer
+    relations:
+        Site:
+            local: site_id
+            foreign: id       
+        ContentType:
+            local: content_type_id
+            foreign: id       
+                 
+PjangoToken:
+    tableName: pjango_token
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true   
+        token: string(100) 
+        status: string(35)
+        expires: datetime
+        object_id: integer
+        content_type_id: integer
+        site_id: integer         
+    relations:
+        Site:
+            local: site_id
+            foreign: id          
+        ContentType:
+            local: content_type_id
+            foreign: id     
+            
+PjangoMedia:
+    tableName: pjango_media
+    actAs:
+        Timestampable:
+    columns:
+        id:
+            type: integer
+            primary: true  
+            notnull: true
+            autoincrement: true
+                
+        description: string
+        file_name: string(255)
+        file_path: string(255)
+        file_size: integer(11)
+        file_type: string(255)
+        
+        digest: string(100)
+        downloads: integer(11)
+        is_default: boolean
+        is_active: boolean
+        object_id: integer        
+        content_type_id: integer
+        site_id: integer        
+        created_by: integer
+        updated_by: integer            
+
+    relations:
+        CreatedBy:
+            class: User            
+            local: created_by
+            foreign: id          
+        UpdatedBy:
+            class: User            
+            local: updated_by
+            foreign: id            
+        ContentType:
+            local: content_type_id
+            foreign: id
+        Site:
+            local: site_id
+            foreign: id              
+        

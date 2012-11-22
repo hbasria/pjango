@@ -203,7 +203,7 @@ $(document).ready(function () {
     
     $('#column-right a').live('dblclick', function () {
     	{% if request.CKEditorFuncNum %}
-        window.opener.CKEDITOR.tools.callFunction({{ request.CKEditorFuncNum }}, '/media/uploads/' + $(this).attr('file'));
+        window.opener.CKEDITOR.tools.callFunction({{ request.CKEditorFuncNum }}, '/thumb/media/uploads/' + $(this).attr('file'));
         self.close();   
         {% else %}
         parent.$('#{{ field }}').attr('value', $(this).attr('file'));

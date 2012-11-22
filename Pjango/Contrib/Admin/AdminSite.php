@@ -48,6 +48,7 @@ class AdminSite {
         	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/$', 'Pjango\Contrib\Admin\Views\app_index'),
         	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/settings/$', 'Pjango\Contrib\Admin\Views\app_model_settings'),
             array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/add/$', 'Pjango\Contrib\Admin\Views\app_addchange'),
+        	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/delete/$', 'Pjango\Contrib\Admin\Views\app_delete'),
             array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/(?P<id>\d+)/edit/$', 'Pjango\Contrib\Admin\Views\app_addchange'),
             array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/(?P<id>\d+)/delete/$', 'Pjango\Contrib\Admin\Views\app_delete'),
         	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/(?P<id>\d+)/meta/$', 'Pjango\Contrib\Admin\Views\app_meta'),

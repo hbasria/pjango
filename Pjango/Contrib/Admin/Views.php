@@ -37,6 +37,8 @@ class AdminViews {
 		$cl = new \Pjango\Contrib\Admin\ChangeList($q);
 		$templateArr['cl'] = $cl;
 	
+		$templateArr['has_add_permission'] = $request->user->has_perm($app_label.'.can_add_'.$model);
+		$templateArr['has_delete_permission'] = $request->user->has_perm($app_label.'.can_delete_'.$model);
 		render_to_response('admin/change_list.html', $templateArr);
 	}	
 	
@@ -182,7 +184,7 @@ class AdminViews {
 	    if(in_array($app_label, $coreApps)){
 	    	$app_label2 = sprintf('Pjango\Contrib\%s', $app_label);
 	    }else {
-	    	$app_label = $app_label;
+	    	$app_label2 = $app_label;
 	    }    
 	    
 	    if(!$request->user->has_perm($app_label.'.can_show_'.$model)){
@@ -301,32 +303,51 @@ class AdminViews {
 	}		
 	
 	function app_delete($request, $app_label=false, $model=false, $id=false) {	
+		$retval = array(); 
 	    $contentType = ContentType::get_for_model($model, $app_label);
 	
 	    if ($contentType){
  	        if($request->user->has_perm($contentType->app_label.'.can_delete_'.$model)){
-	
-	            $modelObj = Doctrine::getTable($model)->find($id);
-	
-	            if($modelObj){
-	                try {
-	                    $modelObj->delete();
- 	                    Messages::Info(__('1 Records deleted'));
-	                } catch (Exception $e) {
-	                	$pos = strpos($e->getMessage(), 'foreign key constraint fails');
-	                	if ($pos === false) {
-	                		Messages::Error($e->getMessage());
-	                	} else {
-	                		Messages::Error(__('Integrity constraint violation'));
-	                	}
-	                }
-	            }
+ 	        	
+ 	        	if ($id){
+ 	        		$modelObj = Doctrine::getTable($model)->find($id);
+ 	        		if($modelObj){
+ 	        			try {
+ 	        				$modelObj->delete();
+ 	        				$retval['messages']['info'] = '1 '.__('Records deleted');
+ 	        			} catch (Exception $e) {
+ 	        				$pos = strpos($e->getMessage(), 'foreign key constraint fails');
+ 	        				if ($pos === false) {
+ 	        					$retval['messages']['error'] = $e->getMessage(); 	        					
+ 	        				} else {
+ 	        					$retval['messages']['error'] = __('Integrity constraint violation');
+ 	        				}
+ 	        			}
+ 	        		} 	        		
+ 	        	}elseif (is_array($_POST['row_id'])){
+ 	        		$deletedRows = Doctrine_Query::create()
+	 	        		->delete($model.' o')
+	 	        		->addWhere('o.site_id = ?', SITE_ID)
+	 	        		->whereIn('o.id', $_POST['row_id'])
+	 	        		->execute();
+ 	        		$retval['messages']['info'] = $deletedRows.' '.__('Records deleted');
+ 	        	}
  	        }else{
- 	            Messages::Error(__('You are not authorized to perform this operation.'));
+ 	        	$retval['messages']['error'] = __('You are not authorized to perform this operation.'); 	            
  	        }
 	    }
-	
-	    HttpResponseRedirect($_SERVER['HTTP_REFERER']);
+	    
+	    if ($id){
+	    	if (isset($retval['messages']['info'])){
+	    		Messages::Info($retval['messages']['info']);
+	    	}
+	    	if (isset($retval['messages']['error'])){
+	    		Messages::Error($retval['messages']['error']);
+	    	}
+	    	HttpResponseRedirect($_SERVER['HTTP_REFERER']);
+	    }else {
+	    	echo json_encode($retval);
+	    }
 	}	
 	
 	function app_meta($request, $app_label=false, $model=false, $id=false) {

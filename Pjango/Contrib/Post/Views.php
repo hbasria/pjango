@@ -122,12 +122,8 @@ class PostViews {
 		if ($request->POST){
 			$form = new $formClass($taxonomy, $request->POST);
 
-			try {
-				
-				if (!$form->is_valid()) {					
-					throw new Exception('Hataları kontrol ederek tekrar deneyin.');
-				}
-				
+			try {				
+				if (!$form->is_valid()) throw new Exception('There are incomplete required fields. Please complete them.');
 				$formData = $form->cleaned_data();
 				if(!$addchangeObj) $addchangeObj = new $modelClass();
 				
@@ -141,11 +137,38 @@ class PostViews {
 				$addchangeObj->Translation[$lng]->slug = stripslashes($request->POST['slug']);
 				$addchangeObj->pub_date = date('Y-m-d H:i:s', $formData['pub_date']);
 				$addchangeObj->post_type = $taxonomy;
-				$addchangeObj->site_id = pjango_ini_get('SITE_ID');
-				$addchangeObj->created_by = $request->user->id;				
-				
+				$addchangeObj->site_id = SITE_ID;
+				$addchangeObj->created_by = $request->user->id;							
 				$addchangeObj->unlink('Categories');
 				$addchangeObj->link('Categories', $formData['categories']);
+				
+				if(class_exists('Menu')){
+					if(intval($formData['meta_menu_location_id'])>0){
+						$parentMenu = Doctrine::getTable('Menu')->find($formData['meta_menu_location_id']);						
+						if($parentMenu){
+							$deletedRows = Doctrine_Query::create()
+								->delete('Menu o')
+								->where('o.site_id = ? AND o.id = ?', array(SITE_ID, $formData['meta_menu_id']))
+								->execute();							
+							
+							$menu = new \Menu();
+							$menu->Translation[$lng]->name = $formData['title'];
+							$menu->Translation[$lng]->slug = $formData['slug'];
+							$menu->url = '/'.$formData['slug'];
+							$menu->site_id = SITE_ID;
+							$menu->save();
+							$menu->getNode()->insertAsLastChildOf($parentMenu);							
+							$request->POST['meta_menu_id'] = $menu->id;
+						}
+							
+					}else {
+						$deletedRows = Doctrine_Query::create()
+							->delete('Menu o')
+							->where('o.site_id = ? AND o.id = ?', array(SITE_ID, $formData['meta_menu_id']))
+							->execute();
+					}
+				}
+				
 				$addchangeObj->save();
 				
 				PjangoMeta::setMeta($contentType->id, $addchangeObj->id, false, $request->POST);

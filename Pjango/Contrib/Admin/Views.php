@@ -218,18 +218,22 @@ class AdminViews {
 			    				'current_admin_submenu'=>$app_label, 
 		    					'current_admin_submenu2'=>$model,
 			    				'title'=>pjango_gettext($model.' add')); 
-	
-	    $coreApps = array('Post','Auth');
-	    $modelAdminClass = sprintf('%s\Models\%sAdmin', $app_label, $model);
-	    $modelUrl = sprintf('%s/admin/Accounting/%s/',pjango_ini_get('SITE_URL'), $model);
-	    $formClass = sprintf("%s\Forms\%sForm", $app_label, $model);
-	    $formData = array();
+	    
+	    $site = \Pjango\Contrib\Admin\AdminSite::getInstance();
 	    $contentType = ContentType::get_for_model($model, $app_label);
 	    
-	    if(in_array($app_label, $coreApps)){
-	    	$modelAdminClass = sprintf('Pjango\Contrib\%s\Models\%sAdmin', $app_label, $model);
-	    	$formClass = sprintf("Pjango\Contrib\%s\Forms\%sForm", $app_label, $model);
+	    $modelAdminClass = $site->_registry[$model];
+	    $modelUrl = sprintf('%s/admin/Accounting/%s/',pjango_ini_get('SITE_URL'), $model);	    
+	    
+	    $modelAdminClassArr = explode('\\', $modelAdminClass);
+	    $modelAdminClassArrTmp = array();
+	    for ($i = 0; $i < count($modelAdminClassArr)-2; $i++) {
+	    	$modelAdminClassArrTmp[] = $modelAdminClassArr[$i];	    	
 	    }
+	    
+	    $formData = array();
+	    $formClass = sprintf("%s\Forms\%sForm", implode('\\', $modelAdminClassArrTmp), $model); ;
+
 	    
 	    $modelAdmin = new $modelAdminClass();	    	    
 	    $templateArr['extraheads'] = $modelAdmin->extraheads;	    

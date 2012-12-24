@@ -246,7 +246,7 @@ class ApplicationBootstrap {
         pjango_ini_set('_INSTALLED_APPS', $_installedApps);        
 	}
 
-    protected function init_h2o(){
+    protected function init_h2o(){    	    	
     	$h2oConfig = pjango_ini_get('H2O_CONFIG');
     	if(!is_array($h2oConfig)) $h2oConfig = array();
     	

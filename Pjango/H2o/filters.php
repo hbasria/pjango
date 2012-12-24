@@ -163,31 +163,36 @@ class NumberFilters extends FilterCollection {
         }
     }
 
-    static function currency($amount, $precision = 2, $currency = 'TL', $negateWithParentheses = false) {
+    static function currency($amount, $precision = 2, $currency = false, $negateWithParentheses = false) {
+    	$currencyCode = pjango_ini_get('CURRENCY_CODE');
+    	if(!$currencyCode) $currencyCode = 'TRY';
+    	
         $definition = array(
-        	'TL' => array('<span class="tlsimge">¨</span>','.',','),
-            'EUR' => array('�','.',','), 
-        	'GBP' => '�', 
-        	'JPY' => '�', 
-            'USD'=>'$', 
-        	'AU' => 
-        	'$', 'CAN' => '$'
+        	'TRY' 	=> array('<span class="tlsimge">¨</span>','.',','),
+            'EUR' 	=> array('&euro;','.',','), 
+        	'GBP' 	=> '&pound;', 
+        	'JPY' 	=> '&yen;', 
+            'USD'	=> '$', 
+        	'AU' 	=> '$', 
+        	'CAN' 	=> '$'
         );
+        
         $negative = false;
         $separator = ',';
         $decimals = '.';
-        $currency = strtoupper($currency);
     
         // Is negative
         if (strpos('-', $amount) !== false) {
             $negative = true;
             $amount = str_replace("-","",$amount);
         }
+        
         $amount = (float) $amount;
 
         if (!$negative) {
             $negative = $amount < 0;
         }
+        
         if ($negateWithParentheses) {
             $amount = abs($amount);
         }
@@ -198,13 +203,14 @@ class NumberFilters extends FilterCollection {
             $amount = $zero;
         }
     
-        if (isset($definition[$currency])) {
-            $symbol = $definition[$currency];
+        if (isset($definition[$currencyCode])) {
+            $symbol = $definition[$currencyCode];
             if (is_array($symbol))
                 @list($symbol, $separator, $decimals) = $symbol;
         } else {
-            $symbol = $currency;
+            $symbol = $currencyCode;
         }
+        
         $amount = number_format($amount, $precision, $decimals, $separator);
 
         return $negateWithParentheses ? "({$symbol}{$amount})" : "{$symbol} {$amount}";
@@ -412,5 +418,3 @@ h2o::addFilter(array('CoreFilters', 'StringFilters', 'NumberFilters', 'DatetimeF
 
 /* Alias default to set_default */
 h2o::addFilter('default', array('CoreFilters', 'set_default'));
-
-?>

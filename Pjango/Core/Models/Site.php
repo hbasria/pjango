@@ -22,4 +22,19 @@ class Site extends BaseSite
 			->where('o.id = ?', SITE_ID)
 			->fetchOne();
 	}
+	
+	public static function findAllAsChoice() {
+		$choices = array();
+	
+		$results = Doctrine_Query::create()
+			->from('Site o')
+			->orderBy('o.lft')
+			->execute();
+	
+		foreach ($results as $resultItem) {
+			$choices[$resultItem->id] =  str_repeat('--', $resultItem->level).$resultItem->name;
+		}
+			
+		return $choices;
+	}	
 }

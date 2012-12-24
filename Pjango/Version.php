@@ -7,5 +7,5 @@ class Version
     /**
      * Current Pjango Version
      */
-    const VERSION = '0.4';
+    const VERSION = '0.5';
 }

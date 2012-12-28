@@ -100,7 +100,7 @@ class PostViews {
 				
 				if ($addchangeObj->Categories && count($addchangeObj->Categories) > 0){
 					foreach ($addchangeObj->Categories as $categoryItem) {
-						$formData['categories'] = $categoryItem->id;
+						$formData['categories'][] = $categoryItem->id;
 					}
 				}		
 

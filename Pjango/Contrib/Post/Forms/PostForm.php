@@ -20,17 +20,13 @@ class PostForm extends Phorm {
     }
 
     protected function define_fields(){ 
-        $this->images = new HiddenField();
-        $this->categories = new MultipleChoiceField(pjango_gettext("Post Categories"), PostCategory::findAllAsChoice($this->taxonomy));
-        $this->status = new DropDownField(pjango_gettext("Post Status"), Post::get_status_choices());
-        $this->pub_date = new DateField(__('Publish Date'));
-        $this->title = new TextField(pjango_gettext("Post Title"), 35, 255);
-        $this->slug = new TextField(pjango_gettext("Post Slug"), 35, 255);
-        $this->meta_menu_id = new HiddenField();
-        $this->meta_menu_location_id = new DropDownField(__("Menu Location"), \Menu::findAllAsChoice());
-        //$this->excerpt = new LargeTextField(pjango_gettext("Post Excerpt"), 5, 60);
-        $this->content = new LargeTextField(pjango_gettext("Post Content"), 25, 75);
-        //$this->template = new TextField(pjango_gettext("Post Template"), 35, 255);
-        $this->weight = new TextField(pjango_gettext("Post Weight"), 10, 255);        	
+        $this->categories = new MultipleChoiceField(__("Post Categories"), PostCategory::findAllAsChoice($this->taxonomy));
+        $this->status = new DropDownField(__("Post Status"), Post::get_status_choices());
+        $this->pub_date = new DateField(__('Publish Date'), array(), array('class'=>'pDateField'));
+        $this->title = new TextField(__("Post Title"), 35, 255);
+        $this->slug = new TextField(__("Post Slug"), 35, 255);
+        $this->excerpt = new LargeTextField(__("Post Excerpt"), 5, 60);
+        $this->content = new LargeTextField(__("Post Content"), 15, 75, array(), array('class'=>'pLargeTextField pEditor'));
+        $this->weight = new TextField(__("Post Weight"), 10, 255);        	
     }
 }

@@ -119,8 +119,9 @@ class SimpleDate {
 	        }
 	    }
 	    
-	    $pattern = "/".implode("",$patternkey)."/";
+	    $pattern = "#".implode("",$patternkey)."#";
 	    preg_match_all($pattern,$date,$newdate);
+	    
 	    $newdate = array_slice($newdate,1);
 	    if($patrVal[0]==34){
 	        $resultvar = array("Year"=>$newdate[0],

@@ -1,5 +1,5 @@
 <?php
 
 $urlpatterns = patterns('',
-    array('^thumb/(?P<url>.*)/$', 'Pjango\Core\Views\thumb')
+	array('media/(.*?)/(thumb|square|small|medium|large)/', 'Pjango\Core\Views\thumb')
 );

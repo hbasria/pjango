@@ -1,6 +1,4 @@
 <?php
-
-
 #	Errors
 class H2o_Error extends Exception {}
 class ParseError extends H2o_Error {}

@@ -140,7 +140,7 @@ abstract class PhormField
      **/
     public function help_text()
     {
-        return sprintf('<p class="phorm_help">%s</p>', htmlentities($this->help_text, ENT_QUOTES, 'UTF-8' ));
+        return sprintf('<span class="help-inline">%s</span>', htmlentities($this->help_text, ENT_QUOTES, 'UTF-8' ));
     }
 
     /**
@@ -150,7 +150,7 @@ abstract class PhormField
      **/
     public function label()
     {
-        return sprintf('<label for="%s">%s</label>', (string)$this->get_attribute('id'), $this->label);
+        return sprintf('<label class="control-label" for="%s">%s</label>', (string)$this->get_attribute('id'), $this->label);
     }
 
     /**
@@ -180,6 +180,7 @@ abstract class PhormField
     public function errors()
     {
         $elts = array();
+        
         if (is_array($this->errors) && count($this->errors) > 0)
         foreach ($this->errors as $error)
         $elts[] = sprintf('<li>%s</li>', $error);
@@ -222,7 +223,7 @@ abstract class PhormField
             {
                 try { 
                     call_user_func($f, $value);
-                }catch (Exception $e) {
+                }catch (ValidationError $e) {
                     $this->errors[] = $e->getMessage();
                 }
             }

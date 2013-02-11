@@ -82,7 +82,6 @@ class Request {
 			$param_arr = array($this);
 			$param_arr = array_merge($param_arr, $regexURLPattern->get_default_args());
 			$callbackArr = $regexURLPattern->_get_callback();
-			
 			call_user_func_array(array(new $callbackArr[0], $callbackArr[1]), $param_arr);			
 		}else{
 			//FIXME redirect 404

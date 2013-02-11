@@ -5,11 +5,8 @@ use Pjango\Core\ModelAdmin,
 
 class PostCategoryAdmin extends ModelAdmin {
 	public function __construct(){
-		$lng = pjango_ini_get('LANGUAGE_CODE');
-
 		$this->list_display = array('get_name');
 		$this->ordering = array('lft');
-		$this->row_actions = array('edit', 'delete');
 	}
 
 }
@@ -23,7 +20,7 @@ class PostAdmin extends ModelAdmin {
     	$this->ordering = '-created_at';
     	
     	$user = User::get_current();
-//     	if($user->has_perm('Post.change_Post')){
+     	if($user->has_perm('Post.change_Post')){
     		$this->admin_menu = array('Post', pjango_gettext('Post'), '/admin/Post/Post/',
     			array('Post', pjango_gettext('Post'), '/admin/Post/Post/',
     		        array('Post', pjango_gettext('Posts'), '/admin/Post/Post/'),
@@ -31,18 +28,14 @@ class PostAdmin extends ModelAdmin {
     				array('Settings', pjango_gettext('Settings'), '/admin/Post/Post/settings/')
 				),    				
     		);    		
-//     	}
+     	}
 
 		$this->third_level_navigation = array(
-			array('key'=>'edit', 'url'=>'edit/', 'name'=>__('Post Properties'))
-    		//array('key'=>'files', 'url'=>'files/', 'name'=>__('Post Files'))
+			array('key'=>'edit', 'url'=>'edit/', 'name'=>__('Post Properties')),
+    		array('key'=>'files', 'url'=>'files/', 'name'=>__('Post Files'))
     	);    		
     								
         $this->row_actions = array('edit', 'delete');    								
     }
 
 }
-
-$site = \Pjango\Contrib\Admin\AdminSite::getInstance();
-$site->register('Post', 'Pjango\Contrib\Post\Models\PostAdmin');
-$site->register('PostCategory', 'Pjango\Contrib\Post\Models\PostCategoryAdmin');

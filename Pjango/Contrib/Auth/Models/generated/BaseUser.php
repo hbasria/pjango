@@ -106,7 +106,7 @@ abstract class BaseUser extends Doctrine_Record
              'foreign' => 'user_id'));
 
             if (class_exists('Contact')) {
-            $this->hasOne('Contact', array(
+            	$this->hasOne('Contact', array(
                         'local' => 'contact_id',
                         'foreign' => 'id'));                        
         }        

@@ -1,21 +1,35 @@
 <?php 
 namespace Pjango\Contrib\Auth\Forms;
+
 use Pjango\Phorm,
-    Pjango\Phorm\Fields\HiddenField,
     Pjango\Phorm\Fields\TextField,
     Pjango\Phorm\Fields\EmailField,
     Pjango\Phorm\Fields\PasswordField,
-    Pjango\Phorm\Fields\BooleanField;
+    Pjango\Phorm\Fields\BooleanField,
+    Pjango\Phorm\Fields\MultipleChoiceField;
 
 class UserForm extends Phorm {
     protected function define_fields(){
-        $this->id = new HiddenField();
-        $this->username = new TextField(pjango_gettext('User name'), 35, 255, array('validate_required'));
-        $this->displayname  = new TextField(pjango_gettext('Display name'), 35, 255);
-        $this->email = new EmailField(pjango_gettext('Email'), 35, 255, array('validate_required'));
-        $this->password = new PasswordField(pjango_gettext('Password'), 35, 255, 'User::getEncryptedPassword');
-        $this->is_active = new BooleanField(pjango_gettext('Is active'));
-        $this->is_staff = new BooleanField(pjango_gettext('Is staff'));
-        $this->is_superuser = new BooleanField(pjango_gettext('Is superuser'));
+
+    	$multiCheckboxWidgetOptions = array(
+    			'widget_class'=>'Pjango\Phorm\Fields\MultiSelectWidget',
+    			'validate_choices'=>false
+    	);    	
+    	
+        $this->username = new TextField(__('User name'), 35, 255, array('validate_required'));
+        $this->displayname  = new TextField(__('User Display name'), 35, 255);
+        $this->email = new EmailField(__('User Email'), 35, 255, array('validate_required'));
+        $this->password = new PasswordField(__('User Password'), 35, 255, 'User::getEncryptedPassword');
+        $this->is_active = new BooleanField(__('Is active'));
+        $this->is_staff = new BooleanField(__('Is staff'));
+        $this->is_superuser = new BooleanField(__('Is superuser'));
+        $this->groups = new MultipleChoiceField(__('User Groups'), \Group::findAllAsChoice(),
+        		array(),array(), $multiCheckboxWidgetOptions);
+        
+        $this->permissions = new MultipleChoiceField(__('User Permissions'), \Permission::findAllAsChoice(),
+        		array(),array(), $multiCheckboxWidgetOptions);        
+        
+        
+        
     }
 }

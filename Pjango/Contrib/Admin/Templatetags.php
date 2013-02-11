@@ -38,9 +38,7 @@ class Result_List_Tag extends H2o_Node {
         
         if (!$cl) return false;
         
-        $resultHeaders = array();
-        
-
+        $resultHeaders = array();       
         
         foreach ($cl->list_display as $field_name) {
         	$text = str_replace('_', ' ', $field_name);
@@ -77,7 +75,7 @@ class Result_List_Tag extends H2o_Node {
         
         $context['result_headers'] = $resultHeaders;
         
-        $tableRowCellTemplate = '<td class="">%s</td>';
+        $tableRowCellTemplate = '<td class="%s">%s</td>';
         
         $tableRows = array();
 
@@ -93,7 +91,7 @@ class Result_List_Tag extends H2o_Node {
         	$tableRowCells = array('<td class="toggleSelection"><input type="checkbox" name="row_id[]" value="'.$identifier.'" /></td>');
 
 			//$cl->row_actions tanımlıysa yerleştir
-			$rowActionTemplate = '<li><a href="%s" onClick="%s" class="%s">%s</a></li>';     
+			$rowActionTemplate = '<a href="%s" onClick="%s"><i class="icon-%s"></i>%s</a>';     
         	$rowActions = array();        
             if (is_array($cl->row_actions)){
                 foreach ($cl->row_actions as $rowAction) {
@@ -119,9 +117,8 @@ class Result_List_Tag extends H2o_Node {
 
         	foreach ($cl->list_display as $columnName) {
         		$columnNameArr = explode('__', $columnName);
+        		$cellClass = $columnName;
         		$cellTxt = '';
-        		
-        		
        		
         		if(count($columnNameArr)>1){
         			$cellTxt = recursive_call_user_func($resultItem, $columnNameArr);
@@ -133,10 +130,10 @@ class Result_List_Tag extends H2o_Node {
 	                }         			
         		}
 
-        		$tableRowCells[] = sprintf($tableRowCellTemplate, $cellTxt);
+        		$tableRowCells[] = sprintf($tableRowCellTemplate, $cellClass, $cellTxt);
         	}
         	
-        	$tableRowCells[] = sprintf('<td class="alignRight horizontalActions"><ul class="rowActions">%s</ul></td>', implode('', $rowActions));
+        	$tableRowCells[] = sprintf('<td class="alignRight horizontalActions">%s</td>', implode('', $rowActions));
         	
         	
         	$tableRows[] = $tableRowCells;
@@ -236,52 +233,76 @@ class Get_Admin_Menu_Tag extends H2o_Node {
     }
 
     function render($context, $stream) {
-    	$menuTemplate = '<li class="%s"><div class="left"><div class="right"><a href="%s">%s</a></div></div></li>';    	
+    	$menuTemplate = '<li class="%s"><a href="%s">%s</a></li>';    	
     	$html = '';
-    	$adminMenuArr = array(
-    	array('home', pjango_gettext('Home'), '/admin/'));    	    	
+    	$adminMenuArr = array(array('home', pjango_gettext('Home'), '/admin/'));    	    	
     	
     	$currentMenuName = $context->resolve($this->args[0]);
+    	if(!$currentMenuName){
+    		$currentMenuName = 'home';
+    	}
     	
     	$site = AdminSite::getInstance();
     	$registry = $site->getRegistry();
     	
-    	foreach ($registry as $value) {
-    		$modelAdmin = new $value;
-
-    		if ($modelAdmin instanceof \Pjango\Core\ModelAdmin){
-    			if ($modelAdmin->admin_menu){
-    				$adminMenuArr[] = $modelAdmin->admin_menu;	
-    			}
+    	$appsMenuArr = array();
+    	
+    	foreach ($registry as $appName => $modelArr) {
+    		foreach ($modelArr as $modelName => $modelAdminClass) {
+    			if(is_string($modelAdminClass)){
+    				$modelAdmin = new $modelAdminClass;
+    				if ($modelAdmin instanceof \Pjango\Core\ModelAdmin){
+    					if ($modelAdmin->admin_menu){
+    						$adminMenuArr[] = $modelAdmin->admin_menu;
+    					}
+    					if ($modelAdmin->apps_menu){
+    						$appsMenuArr[] = $modelAdmin->apps_menu;
+    					}
+    				}    				
+    			}   			
     		}
     	}
 
-    	$i = 0;
-    	$currentMenuId = false;
-    	$adminMenuCount = count($adminMenuArr);
     	foreach ($adminMenuArr as $adminMenuItem) {
     		$menuName = $adminMenuItem[0];
     		$menuUrl = pjango_ini_get('SITE_URL').$adminMenuItem[2];
     		$menuValue = $adminMenuItem[1];
     		
-    		$currentMenuClass = 'passive';   		
+    		$currentMenuClass = '';   		
     		
     	    if ($menuName == $currentMenuName){
     			$currentMenuClass = 'active';
     			$currentMenuId = $i;
     		}
-    		
-    		if ($i == 0) $currentMenuClass .= ' first';    		
-    		if ($currentMenuId && $i == ($currentMenuId+1)) $currentMenuClass .= ' after-active';
-    		if ($i == ($adminMenuCount-1)) $currentMenuClass .= ' last';
-    		
-    		
-			
-			$html .= sprintf($menuTemplate."\n", $currentMenuClass, $menuUrl, $menuValue);
-			
-			$i++;
+
+    		$html .= sprintf($menuTemplate."\n", $currentMenuClass, $menuUrl, $menuValue);
     	}
     	
+    	if(count($appsMenuArr)>0){
+    		$appsHtml = '';
+    		$appsSelected = '';
+    		 
+    		foreach ($appsMenuArr as $appsMenuItem) {
+    			$menuName = $appsMenuItem[0];
+    			$menuUrl = pjango_ini_get('SITE_URL').$appsMenuItem[2];
+    			$menuValue = $appsMenuItem[1];
+    			 
+    			$currentMenuClass = '';
+    			 
+    			if ($menuName == $currentMenuName){
+    				$currentMenuClass = 'active';
+    				$appsSelected .= ': '.__($currentMenuName);
+    			}
+    			 
+    			$appsHtml .= sprintf($menuTemplate."\n", $currentMenuClass, $menuUrl, $menuValue);
+    		}
+    		    		
+    		$html .= '<li class="dropdown">
+    				    	<a href="#" class="dropdown-toggle" data-toggle="dropdown">'.__('Apps').$appsSelected.'<b class="caret"></b></a>
+    				    	<ul class="dropdown-menu">'.$appsHtml.'</ul></li>'; 
+    	}
+    	
+    	   	
     	
 		$stream->write($html);
     }
@@ -295,11 +316,9 @@ class Get_Admin_Submenu_Tag extends H2o_Node {
     }
 
     function render($context, $stream) {
-    	global $site;
-    	    	
-    	$html = '';
-    	$menuTemplate = '<li class="%s"><a href="%s">%s<span class="top"></span><span class="bottom"></span></a>%s</li>';
-    	$menuArr = array();    	
+    	$site = AdminSite::getInstance();
+    	$headerTemplate = '<li class="nav-header">%s</li>';
+    	$menuTemplate = '<li class="%s"><a href="%s">%s</a></li>';
     	
     	$currentMainMenuName = $context->resolve($this->args[0]);
     	$currentMenuName = $context->resolve($this->args[1]);
@@ -308,81 +327,53 @@ class Get_Admin_Submenu_Tag extends H2o_Node {
     	$site = AdminSite::getInstance();
     	$registry = $site->getRegistry();    	
     	
-    	foreach ($registry as $value) {
-    		$modelAdmin = new $value;
-    		
-    		if ($modelAdmin instanceof \Pjango\Core\ModelAdmin){
-    			
-    			if (is_array($modelAdmin->admin_menu) && $modelAdmin->admin_menu[0] == $currentMainMenuName){
-    				$menuArr = $modelAdmin->admin_menu;
-    				unset($menuArr[0]);
-					unset($menuArr[1]);
-					unset($menuArr[2]);
-    			}
-    		}
-    	}
+    	$menuArr = array();
     	
-    	$i = 0;
-    	$currentMenuId = false;
-    	$menuCount = count($menuArr);
+    	foreach ($registry as $appName => $modelArr) {
+    		foreach ($modelArr as $modelName => $modelAdminClass) {
+    			if(is_string($modelAdminClass)){
+    				$modelAdmin = new $modelAdminClass;
+    				
+    				if ($modelAdmin instanceof \Pjango\Core\ModelAdmin){
+    					if (is_array($modelAdmin->admin_menu) && $modelAdmin->admin_menu[0] == $currentMainMenuName){
+    						$menuArr = array_slice($modelAdmin->admin_menu, 3);
+    					}
+    					if (is_array($modelAdmin->apps_menu) && $modelAdmin->apps_menu[0] == $currentMainMenuName){
+    						$menuArr = array_slice($modelAdmin->apps_menu, 3);
+    					}
+    				}
+    			}    			
+    		}
+    	}    	
+    	
+    	$navArray = array();
     	foreach ($menuArr as $menuItem) {
-    		$subMenuArr = array();
-    		$subHtml = '';
-    		
+    		$navArray[] = sprintf($headerTemplate, $menuItem[1]);
+
     		if (count($menuItem) > 3){
-    			$subMenuArr = $menuItem;
-    			unset($subMenuArr[0]);
-				unset($subMenuArr[1]);
-				unset($subMenuArr[2]);
-				
-				$j = 0;
-				$currentSubMenuId = false;
-				$subMenuCount = count($subMenuArr);
+    			$subMenuArr = array_slice($menuItem, 3);
+
 				foreach ($subMenuArr as $subMenuItem) {
 		    		$subMenuName = $subMenuItem[0];
 		    		$subMenuUrl = pjango_ini_get('SITE_URL').$subMenuItem[2];
 		    		$subMenuValue = $subMenuItem[1];
 
-		    		$currentSubMenuClass = 'passive';  
+		    		$currentSubMenuClass = '';  
 		    		
 				   	if ($subMenuName == $currentSubMenuName){
 		    			$currentSubMenuClass = 'active';
-		    			$currentSubMenuId = $i;
-// 		    			seçili menünün üst menüsünü currentMenu olarak al
-		    			$currentMenuName = $menuItem[0];
-		    		}		    		
-		    		
-		    		if ($j == 0) $currentSubMenuClass .= ' first';    		
-		    		if ($currentSubMenuId && $j == ($currentSubMenuId+1)) $currentSubMenuClass .= ' after-active';
-		    		if ($j == ($subMenuCount-1)) $currentSubMenuClass .= ' last';	
+		    		}		
 
-		    		$subHtml .= sprintf($menuTemplate."\n", $currentSubMenuClass, $subMenuUrl, $subMenuValue, '');
-		    		$j++;
-					
+		    		$navArray[] = sprintf($menuTemplate, $currentSubMenuClass, $subMenuUrl, $subMenuValue);
 				}
     		}
-    		$menuName = $menuItem[0];
-    		$menuUrl = pjango_ini_get('SITE_URL').$menuItem[2];
-    		$menuValue = $menuItem[1];
     		
-    		$currentMenuClass = 'passive';   	
-    		$subMenuHtml = '';	
     		
-    	    if ($menuName == $currentMenuName){
-    			$currentMenuClass = 'active';
-    			$currentMenuId = $i;
-    			$subMenuHtml = '<ul class="navigation">'.$subHtml.'</ul>';
-    		}
     		
-    		if ($i == 0) $currentMenuClass .= ' first';    		
-    		if ($currentMenuId && $i == ($currentMenuId+1)) $currentMenuClass .= ' after-active';
-    		if ($i == ($menuCount-1)) $currentMenuClass .= ' last';
-			$html .= sprintf($menuTemplate."\n", $currentMenuClass, $menuUrl, $menuValue, $subMenuHtml);
-			
-			$i++;
     	}
     	
-		$stream->write($html);
+    	
+		$stream->write(implode('', $navArray));
     }
 }
 
@@ -400,52 +391,46 @@ class Admin_List_Filter_Tag extends H2o_Node {
 		$model = $cl->get_model();
 		$filterArr = array();
 		
-		$conn = Doctrine_Manager::connection();
-		
-		foreach ($cl->list_filter as $list_filter_value) {
+		foreach ($cl->list_filter as $filterItem) {
 			$filter = array();
-			$filterKeyArr = explode('__', $list_filter_value); //Categories__name
+			$filterItemArr = explode('__', $filterItem); //Categories__name
 			
-			if (count($filterKeyArr)>1){
-			    $filterKey = $list_filter_value; //status
-			    $filterKeyStr = ucfirst($filterKey); //Status
+			//join varsa
+			if (count($filterItemArr)>1){
+			    $filterKey = $filterItemArr[0].'__id'; //Categories__id
+			    $filterKeyStr = ucfirst($filterKey); //Categories__name
 			    
-				$q = Doctrine_Query::create()
-					->select('DISTINCT(f.'.$filterKeyArr[1].') AS filterKey')
+				$selecboxData = Doctrine_Query::create()
+					->select('o.id, f.id, f.'.$filterItemArr[1].' AS filterKey')
 					->from($model.' o')
-					->leftJoin('o.'.$filterKeyArr[0].' f');
-				
-				$stmt = $conn->prepare($q->getSqlQuery());
-				$stmt->execute();
-				$selecboxData = $stmt->fetchAll();
-
-				
+					->leftJoin('o.'.$filterItemArr[0].' f')
+					->groupBy('f.'.$filterItemArr[1])
+					->execute(array(), Doctrine_Core::HYDRATE_NONE);				
 			}else {				    
-			    $filterKey = $list_filter_value; //status
-			    $filterKeyStr = ucfirst($filterKey); //Status			    
+			    $filterKey = $filterItem; //status
+			    $filterKeyStr = ucfirst($filterKey); //Status	
 
-				//filtrelenecek sütunun DISTINCT ile alınmış listesi
-				$q = Doctrine_Query::create()
-					->select('DISTINCT(o.'.$filterKey.') AS filterKey')
-					->from($model.' o');
+			    $selecboxData = Doctrine_Query::create()
+					->select('o.id, o.'.$filterKey.' AS filterKey, o.'.$filterKey.' AS filterKey')
+					->from($model.' o')
+					->groupBy('o.'.$filterKey)
+					->execute(array(), Doctrine_Core::HYDRATE_NONE);					    
 			}
 			
-			$stmt = $conn->prepare($q->getSqlQuery());
-			$stmt->execute();
-			$selecboxData = $stmt->fetchAll();			
-			
 			$selecboxDataArr = array(array(
-								'name'=>'All '.$filterKeyStr, 
-								'value'=>$cl->get_query_string(array(), array($filterKey))));
+				'name'=>'All '.$filterKeyStr, 
+				'value'=>$cl->get_query_string(array(), array($filterKey))));
 			
+			$selectedFilterKeyValue = false ;
 			foreach ($selecboxData as $selecboxDataItem) {
-			    $selecboxItemName = ucfirst($selecboxDataItem[0]);
-			    $selecboxItemValue = $cl->get_query_string(array($filterKey=>$selecboxDataItem[0]));
+			    $selecboxItemName = ucfirst($selecboxDataItem[2]);
+			    $selecboxItemValue = $cl->get_query_string(array($filterKey=>$selecboxDataItem[1]));
 			    $selecboxDataArr[] = array('name'=>$selecboxItemName, 'value'=>$selecboxItemValue);
-			}			
-			
-			//eğer filtreleme yapılmış ise
-			$selectedFilterKeyValue = isset($cl->params[$filterKey]) ? $cl->params[$filterKey] : false ;
+
+			    if($cl->params[$filterKey] == $selecboxDataItem[1]){
+			    	$selectedFilterKeyValue = $selecboxItemName ;
+			    }
+			}		
 			
 			if ($selectedFilterKeyValue){
 			    $filter['selected'] = ucfirst($selectedFilterKeyValue);
@@ -460,22 +445,78 @@ class Admin_List_Filter_Tag extends H2o_Node {
 		}	
 		
 		$retVal = array();
-		
+
 		foreach ($filterArr as $filterArrvalue) {
-			$liElem = '<li>';
-			$liElem .= '<div class="label">'.__($filterArrvalue['label']).'</div>';
-			$liElem .= '<div class="dropDown"><span><span>'.__($filterArrvalue['selected']).'</span></span>';
-			$liElem .= '<div class="panel"><div><ul>';
-			
+			$liElem = '<div class="btn-group">';
+			$liElem .= '<button class="btn btn-mini">'.__($filterArrvalue['selected']).'</button>';
+			$liElem .= '<button class="btn dropdown-toggle btn-mini" data-toggle="dropdown"><span class="caret"></span></button>';
+			$liElem .= '<ul class="dropdown-menu">';
+
 			foreach ($filterArrvalue['selecbox_data'] as $selecboxItem) {
 				$liElem .= '<li><a href="'.$selecboxItem['value'].'">'.__($selecboxItem['name']).'</a></li>';
 			}
 			
-			$liElem .= '</ul></div></div><div class="mask"></div></div></li>';
+			$liElem .= '</ul></div>';
 			$retVal[] = $liElem;
 		}
 		
 		$stream->write(implode('', $retVal));
+	}
+}
+
+class Admin_List_Search_Tag extends H2o_Node {
+
+	function __construct($argstring, $parser, $position = 0) {
+		$this->args = H2o_Parser::parseArguments($argstring);
+	}
+
+	function render($context, $stream) {
+		$cl = $context->resolve($this->args[0]);
+		if (!$cl) return false;
+		
+		if(is_array($cl->search_fields) && count($cl->search_fields)>0){
+			$value = isset($_GET['q']) ? $_GET['q'] : '';
+			
+			$retVal = '<form action="" method="get" class="form-search pull-right">
+								<div class="input-append">
+									<input name="q" type="text" value="'.$value.'" class="search-query">
+									<button type="submit" class="btn">Search</button>
+								</div>			
+							</form>';
+			
+			$stream->write($retVal);			
+		}		
+	}
+}
+
+class Admin_Actions_Tag extends H2o_Node {	
+
+	function __construct($argstring, $parser, $position = 0) {
+		$this->args = H2o_Parser::parseArguments($argstring);
+	}
+
+	function render($context, $stream) {
+		$cl = $context->resolve($this->args[0]);
+		if (!$cl) return false;
+
+		$html = '<div class="btn-group">';		
+		$html .= '<button class="btn btn-primary btn-mini">'.__('Actions').'</button>';
+		$html .= '<button class="btn btn-primary dropdown-toggle btn-mini" data-toggle="dropdown"><span class="caret"></span></button>';
+		$html .= '<ul class="dropdown-menu">';		
+
+		foreach ($cl->actions as $actionValue) {
+			if($actionValue == 'divider'){
+				$html .= '<li class="divider"></li>';
+			}else {
+				$html .= sprintf('<li><a href="./%s/">%s</a></li>', $actionValue, __('Action '.$actionValue));
+			}
+		}			
+		
+		
+		$html .= '</ul>';		
+		$html .= '</div>';
+
+		$stream->write($html);
 	}
 }
 
@@ -519,7 +560,7 @@ class Account_Switcher_Tag extends H2o_Node {
 
         $sitesArr = array();
         $selectedsiteName = '';
-        $siteId = pjango_ini_get('SITE_ID');
+        $siteId = SITE_ID;
         foreach ($sites as $value) {
             $sitesArr[] = sprintf('<li><a href="?site=%d">%s</a></li>', $value->id, $value->name);
             
@@ -534,4 +575,6 @@ H2o::addTag(array('result_list'));
 H2o::addTag(array('get_admin_menu'));
 H2o::addTag(array('get_admin_submenu'));
 H2o::addTag(array('admin_list_filter'));
+H2o::addTag(array('admin_list_search'));
+H2o::addTag(array('admin_actions'));
 H2o::addTag(array('account_switcher'));

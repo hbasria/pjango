@@ -62,12 +62,16 @@ class MultiCheckboxWidget extends PhormWidget
             $option_attributes = array('value' => $this->clean_string($actual));
             if (in_array($actual, $value)) $option_attributes['checked'] = 'checked';
             
-            $options[] = sprintf('<label><input type="checkbox" %s %s />%s</label>',
-                    $this->serialize_attributes($attributes),
+            //javascript için idler farklı olsun
+            $newAttributes = $attributes;
+            $newAttributes['id'] = $attributes['id'].$this->clean_string($actual);            
+            
+            $options[] = sprintf('<label class="checkbox inline"><input type="checkbox" %s %s />%s</label>',
+                    $this->serialize_attributes($newAttributes),
                     $this->serialize_attributes($option_attributes),
                     $this->clean_string($display));            
         }
 
-        return sprintf('<span>%s</span>', implode($options));
+        return implode($options);
     }
 }

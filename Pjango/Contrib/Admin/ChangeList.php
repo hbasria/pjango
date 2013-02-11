@@ -20,7 +20,28 @@ define('ERROR_FLAG', 'e');
 define('SITE_VAR', 'site');
 
 
+function is_date( $str ){
+	$stamp = strtotime( $str );
+
+	if (!is_numeric($stamp))
+	{
+		return FALSE;
+	}
+	$month = date( 'm', $stamp );
+	$day   = date( 'd', $stamp );
+	$year  = date( 'Y', $stamp );
+
+	if (checkdate($month, $day, $year))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
 class ChangeList {
+	private $app = null;
     private $model = null;
     private $model_admin = false;
 
@@ -57,19 +78,25 @@ class ChangeList {
     var $paginator_display = '';
 
     //def __init__(self, request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields, list_select_related, list_per_page, list_editable, model_admin):
-    function __construct($q, $list_display=false, $list_display_links=false, $list_filter=false, $date_hierarchy=false, $search_fields=false, $list_per_page=false, $row_actions=false) {
-        //FROM
-        preg_match('/FROM\s[a-zA-Z\\\]{3,30}/i', $q->getDQL() , $matches);
-        $this->model = trim(str_replace('FROM', '', $matches[0]));
+    function __construct($app, $model, $q, $list_display=false, $list_display_links=false, $list_filter=false, $date_hierarchy=false, $search_fields=false, $list_per_page=false, $row_actions=false, $actions=false) {
+        $this->app = $app;
+        $this->model = $model;
+        
+    	if(func_num_args() == 1){
+    		$q = $app;
+    		preg_match('/FROM\s[a-zA-Z\\\]{3,30}/i', $q->getDQL() , $matches);
+    		$this->model = trim(str_replace('FROM', '', $matches[0]));
+    	}    	
         
         $site = \Pjango\Contrib\Admin\AdminSite::getInstance();
         $registry = $site->getRegistry();
         
-        if (isset($registry[$this->model])){
-            $modelAdmin = $registry[$this->model];
-            $this->model_admin = new $modelAdmin;
-        }
-         
+        if($this->app && $this->model){
+        	if(isset($registry[$this->app][$this->model])){
+        		$this->model_admin = new $registry[$this->app][$this->model];
+        	}
+        }        
+
         if ($this->model_admin){
             $this->list_display           = $this->model_admin->list_display;
             $this->list_display_links     = $this->model_admin->list_display_links;
@@ -84,6 +111,7 @@ class ChangeList {
             $this->ordering               = $this->model_admin->ordering;
             $this->actions                = $this->model_admin->actions;
             $this->row_actions            = $this->model_admin->row_actions;
+            $this->actions            	  = $this->model_admin->actions;
         }
         
         if ($list_display) $this->list_display = $list_display;
@@ -93,7 +121,8 @@ class ChangeList {
         if ($search_fields) $this->search_fields = $search_fields;
         if ($row_actions) $this->row_actions = $row_actions;
         if ($list_per_page) $this->list_per_page = $list_per_page;
-         
+        if ($actions) $this->actions = $actions;
+        
         if (is_array($this->list_filter)){
             $this->has_filters = true;
         }
@@ -162,32 +191,78 @@ class ChangeList {
 
     function get_query_set() {
         $leftJoinArr = array();
-        $rootAlias = $this->query_set->getRootAlias();
+        $rootAlias = $this->query_set->getRootAlias();        
 
 //         if ($this->list_display){
 //             $this->query_set->select('id, '.implode($this->list_display, ', '));
 //         }
          
 //         TODO = dışındaki sorgular içinde kontrol edilmeli
+
         foreach ($this->params as $key => $value) {
-            $paramsKeyArr = explode('__', $key);
-
-            //?Types__id=7 gibi
-            if (count($paramsKeyArr)>1){
-                $joinField = $paramsKeyArr[0];
-                $joinKey = 'jk'.count($leftJoinArr);
-
-                if(!isset($leftJoinArr[$joinField])){
-                    $this->query_set->leftJoin("{$rootAlias}.{$joinField} {$joinKey}");
-                    $leftJoinArr[$joinField] = $joinKey;
-                }
-
-                $this->query_set->addWhere($leftJoinArr[$joinField].'.'.$paramsKeyArr[1].' = ?', $value);
-            }else {
-                $this->query_set->andWhere("{$rootAlias}.{$key} = ? ", $value);
+        	$value = trim(htmlentities(strip_tags($value)));
+        	if (get_magic_quotes_gpc()) $value = stripslashes($value);
+        	//$value = mysql_real_escape_string($value);
+            
+        	if(strlen($value)<=0) continue;
+        	
+        	$paramsKeyArr = explode('__', $key);
+            $paramsKeyArrCount = count($paramsKeyArr);
+            $paramsKeyExcluded = array('gte'	=> '>=', 'lte'	=> '<=', 'gt'	=> '>', 'lt'	=> '<'); 
+            
+            $stringOperator = $paramsKeyArr[$paramsKeyArrCount-1];
+            $stringOperatorExist = array_key_exists($stringOperator, $paramsKeyExcluded);
+            
+            if($stringOperatorExist){
+            	$paramsKeyArrCount = $paramsKeyArrCount-1;            
+            }            
+            
+            $key = $paramsKeyArr[$paramsKeyArrCount-1];
+            
+            //girilen değer tarih ise
+            $isDate = date_parse_from_format(pjango_ini_get('DATE_FORMAT'), $value);
+            if(($isDate['warning_count']+$isDate['error_count'])<=0){
+            	$value = date_create_from_format(pjango_ini_get('DATE_FORMAT'), $value);
+            	$value = $value->format('Y-m-d');
             }
 
+            if ($paramsKeyArrCount>1){  
+            	//relationlarda sorun çıkıyor
+            	//$modelTable = \Doctrine_Core::getTable($paramsKeyArr[0]);
+            	//if(!$modelTable->getColumnDefinition($key)){
+            	//	continue;
+            	//}
+            	
+            	$joinField = $paramsKeyArr[0];
+            	$joinKey = 'jk'.count($leftJoinArr);
+            	 
+            	if(!isset($leftJoinArr[$joinField])){
+            		$this->query_set->leftJoin("{$rootAlias}.{$joinField} {$joinKey}");
+            		$leftJoinArr[$joinField] = $joinKey;
+            	}       
 
+            	if($stringOperatorExist){
+            		//?Orders__txn_date__gte=01%2F01%2F2013
+            		$this->query_set->andWhere("$leftJoinArr[$joinField].{$key} {$paramsKeyExcluded[$paramsKeyArr[$paramsKeyArrCount]]} ? ", $value);
+            	}else {          
+            		//?Orders__txn_date=01%2F01%2F2013
+            		$this->query_set->addWhere("$leftJoinArr[$joinField].{$key} = ? ", $value);
+            	}            	
+            }else {            	
+            	$modelTable = \Doctrine_Core::getTable($this->get_model());
+            	if(!$modelTable->getColumnDefinition($key)){
+            		continue;
+            	}
+            	
+            	if($stringOperatorExist){
+            		//?txn_date__gte=01%2F01%2F2013
+            		$this->query_set->andWhere("{$rootAlias}.{$key} {$paramsKeyExcluded[$paramsKeyArr[$paramsKeyArrCount]]} ? ", $value);
+            	}else {          
+            		//?txn_date=01%2F01%2F2013
+            		$this->query_set->addWhere("{$rootAlias}.{$key} = ? ", $value);
+            	}             	
+            }
+                        
         }
         
         #
@@ -216,11 +291,15 @@ class ChangeList {
         	}
         	
         	$this->query_set->orderBy(implode(',', $orderingArr));        	
-        }        
+        }     
+
+        
          
+        
         if($this->search_fields){
             $searchQuery = isset($_POST[SEARCH_VAR]) ? $_POST[SEARCH_VAR] : false;
             $searchQuery = isset($_GET[SEARCH_VAR]) ? $_GET[SEARCH_VAR] : false;
+            $searchQuery = str_replace(array(';', "'", '"', '-', '*'), '', $searchQuery);
             
             if ($searchQuery){
                 $searchFields = array();
@@ -243,7 +322,6 @@ class ChangeList {
                         $searchFields[] = "$rootAlias.$value LIKE '%".$searchQuery."%'";
                     }
                 }
-                
                 $this->query_set->andWhere('('.implode(' OR ', $searchFields).')');
             }
         }
@@ -285,14 +363,11 @@ class ChangeList {
             '?p={%page_number}&'.$pagerParams
         );
 
-        $pagerLayout->setTemplate('<a href="{%url}">{%page}</a>');
-        $pagerLayout->setSelectedTemplate('<span>{%page}</span>');
+        $pagerLayout->setTemplate('<li><a href="{%url}">{%page}</a></li>');
+        $pagerLayout->setSelectedTemplate('<li class="disabled"><a href="#">{%page}</a></li>');
 
-
-
-        $pager = $pagerLayout->getPager();
-        //$rs = $pager->execute(array(), Doctrine_Core::HYDRATE_SCALAR);
-        $rs = $pager->execute();
+        $pager = $pagerLayout->getPager();        
+		$rs = $pager->execute();//Doctrine_Query_Exception,Doctrine_Connection_Mysql_Exception
 
         $this->result_list = $rs;
         $this->full_result_count = $pager->getNumResults();        
@@ -300,12 +375,23 @@ class ChangeList {
         $this->can_show_all = $this->result_count <= MAX_SHOW_ALL_ALLOWED;
         $this->multi_page = $this->result_count > $this->list_per_page;
         $this->paginator = $pager;
-        $this->paginator_display = $pagerLayout->display(array(), true);
+        $this->paginator_display = '<ul>'.$pagerLayout->display(array(), true).'</ul>';
     }
 
+    function get_app() {
+    	return $this->app;
+    }    
+    
     function get_model() {
         return $this->model;
     }
+    
+    function get_model_admin() {
+    	return $this->model_admin;
+    }    
+    
+    
+    
 
      
 

@@ -12,9 +12,11 @@
  */
 class Site extends BaseSite
 {
-	const TYPE_INDIVIDUAL = 'individual'; //Corporate|Individual
-	const TYPE_CORPORATE = 'corporate'; //Corporate|Individual
+	const TYPE_INDIVIDUAL = 'individual'; 
+	const TYPE_CORPORATE = 'corporate';
 	
+	const STATUS_ACTIVE = 'active'; 
+	const STATUS_PASSIVE = 'passive';
 	
 	public static function get_current() {
 		return Doctrine_Query::create()
@@ -22,4 +24,31 @@ class Site extends BaseSite
 			->where('o.id = ?', SITE_ID)
 			->fetchOne();
 	}
+	
+	public static function findAllAsChoice() {
+		$choices = array();
+	
+		$results = Doctrine_Query::create()
+			->from('Site o')
+			->orderBy('o.lft')
+			->execute();
+	
+		foreach ($results as $resultItem) {
+			$choices[$resultItem->id] =  str_repeat('--', $resultItem->level).$resultItem->name;
+		}
+			
+		return $choices;
+	}	
+	
+	public static function getTypeChoices() {
+		return array(Site::TYPE_INDIVIDUAL=>__('Site Type '.Site::TYPE_INDIVIDUAL),
+				Site::TYPE_CORPORATE=>__('Site Type '.Site::TYPE_CORPORATE));
+	}
+	
+	public static function getStatusChoices() {
+		return array(Site::STATUS_ACTIVE=>__('Site Status '.Site::STATUS_ACTIVE),
+		Site::STATUS_PASSIVE=>__('Site Status '.Site::STATUS_PASSIVE));
+	}	
+	
+	
 }

@@ -24,7 +24,7 @@ class AdminSite {
         return $this->_registry;
     }    
 
-    public function register($model_or_iterable, $admin_class=null){
+    public function register($app_label, $model_or_iterable, $admin_class=null){
 
         /*if (is_null($admin_class)) {
          $admin_class = ModelAdmin;
@@ -36,7 +36,7 @@ class AdminSite {
         	
         }*/
 
-        $this->_registry[$model_or_iterable] = $admin_class;
+        $this->_registry[$app_label][$model_or_iterable] = $admin_class;
     }
     
     public static function get_urls(){     
@@ -48,6 +48,8 @@ class AdminSite {
         	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/$', 'Pjango\Contrib\Admin\Views\app_index'),
         	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/settings/$', 'Pjango\Contrib\Admin\Views\app_model_settings'),
             array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/add/$', 'Pjango\Contrib\Admin\Views\app_addchange'),
+        	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/delete/$', 'Pjango\Contrib\Admin\Views\app_delete'),
+        	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/delete/(?P<id>\d+)/$', 'Pjango\Contrib\Admin\Views\app_delete'),
             array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/(?P<id>\d+)/edit/$', 'Pjango\Contrib\Admin\Views\app_addchange'),
             array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/(?P<id>\d+)/delete/$', 'Pjango\Contrib\Admin\Views\app_delete'),
         	array('^admin/(?P<app_label>\w+)/(?P<model>\w+)/(?P<id>\d+)/meta/$', 'Pjango\Contrib\Admin\Views\app_meta'),

@@ -42,9 +42,3 @@ class PermissionAdmin extends ModelAdmin {
 		$this->row_actions = array('edit','delete');
 	}
 }
-
-
-$site = \Pjango\Contrib\Admin\AdminSite::getInstance();
-$site->register('User', 'Pjango\Contrib\Auth\Models\UserAdmin');
-$site->register('Group', 'Pjango\Contrib\Auth\Models\GroupAdmin');
-$site->register('Permission', 'Pjango\Contrib\Auth\Models\PermissionAdmin');

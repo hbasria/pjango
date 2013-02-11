@@ -26,7 +26,7 @@ class PjangoMedia extends BasePjangoMedia
 	}
 	
 	public function square_url() {
-		return $this->get_thumb_url('thumb');
+		return $this->get_thumb_url('square');
 	}		
 	
 	public function small_url() {
@@ -46,53 +46,44 @@ class PjangoMedia extends BasePjangoMedia
 	}	
 		
     public function get_thumb_url($size = 'original') {
-    	$isFrame = strpos($this->description, '<iframe');
+    	$youtubeEmbed = strpos($this->description, '<iframe');
     	
-    	if ($isFrame === false) {
-    	    if(strlen($this->file_path)>0){    	  
-    	    	$pathArr = explode('/', preg_replace('/(.*?)media\//i', '/media/', $this->file_path));
-    	    	$pathArr[count($pathArr)] = $pathArr[count($pathArr)-1];
-    	    	$pathArr[count($pathArr)-2] = $size;
-    	    	$path = implode('/', $pathArr);
-            	return pjango_ini_get('SITE_URL_PREFIX').'/thumb'.$path;
-        	}
+    	if ($youtubeEmbed === false) {
+    		if(strlen($this->file_path)>0){
+    			$url = preg_replace('/(.*?)media\//i', '/media/', $this->file_path);
+    			$urlArr = explode('/', pjango_ini_get('SITE_URL').$url);
+    			
+    			$cacheFile = sprintf('%s/cache/images/%s/%s',SITE_PATH, $size, implode('-', $urlArr));
+    			
+    			if (is_file($cacheFile)){
+    				return sprintf('%s/cache/images/%s/%s',pjango_ini_get('SITE_URL'), $size, implode('-', $urlArr));
+    			}else {
+    				$lastItem = $urlArr[count($urlArr)-1];
+    				$urlArr[count($urlArr)-1] = $size;
+    				$urlArr[] = $lastItem;
+    				return pjango_ini_get('SITE_URL').implode('/', $urlArr);
+    			}
+    		}
     	}else {
     		preg_match('/[^\s]*youtube\.com[^\s]*?embed\/([-\w]+)[^\s]*/', $this->description, $matches);
     		$videoId = false;
     		if (isset($matches[1])){
     			$videoId = $matches[1];
     		}
-    		
+    	
     		if ($videoId){
     			return sprintf('http://img.youtube.com/vi/%s/default.jpg',$videoId);
-    		}    		
-    	}    	
-    
-        return pjango_ini_get('MEDIA_URL').'/img/no-image.jpg';
+    		}
+    	}
+
+    	return pjango_ini_get('MEDIA_URL').'/img/no-image.jpg';
     }
     
     public function get_thumb_elem($width=false, $height=32) {
     	$widthStr = ($width) ? sprintf(' width="%d" ', $width) : '';
     	$heightStr = ($height) ? sprintf(' height="%d" ', $height) : '';
     	
-        
-        $isFrame = strpos($this->description, '<iframe');
-        
-        if ($isFrame === false) {
-            return sprintf('<img src="%s" %s %s />', $this->get_thumb_url(), $widthStr, $heightStr);
-        }
-        
-        preg_match('/[^\s]*youtube\.com[^\s]*?embed\/([-\w]+)[^\s]*/', $this->description, $matches);
-        
-        $videoId = false;
-        if (isset($matches[1])){
-            $videoId = $matches[1];
-        }
-        
-        if ($videoId){
-            return sprintf('<img src="http://img.youtube.com/vi/%s/default.jpg" %s %s>',$videoId, $widthStr, $heightStr);
-        }else {
-            return sprintf('<img src="%s" %s %s />', pjango_ini_get('MEDIA_URL').'/img/no-image.jpg', $widthStr, $heightStr);
-        }            
+        return sprintf('<img src="%s" %s %s />', $this->thumb_url(), $widthStr, $heightStr);
+                    
     }    
 }

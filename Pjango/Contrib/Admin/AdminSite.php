@@ -24,7 +24,7 @@ class AdminSite {
         return $this->_registry;
     }    
 
-    public function register($model_or_iterable, $admin_class=null){
+    public function register($app_label, $model_or_iterable, $admin_class=null){
 
         /*if (is_null($admin_class)) {
          $admin_class = ModelAdmin;
@@ -36,7 +36,7 @@ class AdminSite {
         	
         }*/
 
-        $this->_registry[$model_or_iterable] = $admin_class;
+        $this->_registry[$app_label][$model_or_iterable] = $admin_class;
     }
     
     public static function get_urls(){     

@@ -1,5 +1,5 @@
 {% if results %}
-<table cellspacing="0" summary="" class="datatable">
+<table class="table table-striped">
     <thead>
         <tr>
             <th class="first toggleAll"><input type="checkbox" id="toggleAll"/></th>
@@ -21,5 +21,5 @@
     </tbody>
 </table>
 
-<p class="paginator">{{ cl.paginator_display }}</p>
+<div class="pagination">{{ cl.paginator_display }}</div>
 {% endif %}

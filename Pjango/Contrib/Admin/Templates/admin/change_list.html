@@ -4,67 +4,30 @@
 {% block extrahead %}{% endblock %}
 
 {% block breadcrumb %}
-    <li>{{ title }}</li>
+    <li><a href="{{ SITE_URL }}/admin/{{ current_admin_menu }}/{{ current_admin_submenu }}/">{{ current_admin_menu }}</a> <span class="divider">/</span></li>
+    <li><a href="{{ SITE_URL }}/admin/{{ current_admin_menu }}/{{ current_admin_submenu2 }}/">{{ current_admin_submenu2 }}</a> <span class="divider">/</span></li>
+    <li class="active">{{ title }}</li>     
 {% endblock %}
 
 {% block third_level_navigation %}
-	{% if third_level_navigation %}
-		<ul class="navigation">
-		    {% for navigation_item in third_level_navigation %}
-		        <li class="{% if loop.first %}first{% endif %} {% if loop.last %}last{% endif %} {{ navigation_item.class }}"><div class="left"><div class="right"><a href="{{ navigation_item.url }}">{{ navigation_item.name }}</a></div></div></li>
-		    {% endfor %}
-		</ul>
-	{% endif %}
-{% endblock %}
-
-{% block second_level_navigation %}
+<ul class="nav nav-tabs">
+    {% for navigation_item in third_level_navigation %}
+        <li class="{{ navigation_item.class }}"><a href="{{ navigation_item.url }}">{{ navigation_item.name }}</a></li>
+    {% endfor %}
+</ul>
 {% endblock %}
 
 {% block content %}
 
-        <!--
-        <div id="thirdLevelContent">
-            <div id="thirdLevelTools">
-            <div id="messagePlaceholder" class='messagePlaceholder'></div>
-            <ul class='contextContainer'>
-                <li><a class="buttonLink" href="{% if addchange_url %}{{ SITE_URL }}{{ addchange_url }}{% else %}./add/{% endif %}"><span>Yeni Ekle</span></a></li>
-            </ul>
-        </div>  
-        -->
-        
-        <div class='tableWrapper'>
-            <div class='tableHeader'>
-                <ul class='tableActions'>
-                    <li><a href="{% if addchange_url %}{{ SITE_URL }}{{ addchange_url }}{% else %}./add/{% endif %}" class="inlineIcon ekle">Yeni ekle</a></li>
-                    
-                </ul>
-                
-                {% if cl.has_filters %}
-                    <ul class="tableFilters alignRight">
-                    {% admin_list_filter cl %}
-                    </ul>
-                {% endif %}
-                
-			    <div class='clear'></div>
-                <div class='corner left'></div>
-                <div class='corner right'></div>
-   		 </div>
-		
-        {% result_list cl %}   
-        
-        
-        
+    <div class="btn-toolbar">
+        {% admin_actions cl %}
+	    {% if cl.has_filters %}	    
+	        {% admin_list_filter cl %}
+	    {% endif %}        
+	    
+	    {% admin_list_search cl %}
     </div>
-</div>
 
-<script type="text/javascript">
-$(document).ready(function()
-{
-    $("#toggleAll").click(function(){
-        $('.datatable').find(':checkbox').attr('checked', this.checked);
-    });                 
-});
-        
-</script>
+    {% result_list cl %}   
 
 {% endblock %}   

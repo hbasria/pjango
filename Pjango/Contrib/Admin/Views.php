@@ -14,29 +14,29 @@ class AdminViews {
 				'current_admin_submenu2'=>$model,
 				'title'=>__("$app_label $model Files"));
 		
-		$coreApps = array('Post');
-		
 		$modelAdminClass = sprintf('%s\Models\%sAdmin', $app_label, $model);
-		
-		if(in_array($app_label, $coreApps)){
-			$modelAdminClass = sprintf('Pjango\Contrib\%s\Models\%sAdmin', $app_label, $model);
-		}		
-		
-		
-		$modelAdmin = new $modelAdminClass();
+		$modelAdmin = new $modelAdminClass;
 		$modelUrl = sprintf('%s/admin/%s/%s/',pjango_ini_get('SITE_URL'), $app_label, $model);
-		$modelClass = $model;		
 		$contentType = ContentType::get_for_model($model, $app_label);
-	
-		$templateArr['third_level_navigation'] = $modelAdmin->get_third_level_navigation('files', $modelUrl, $id);
+		
+		$pjangoMediaAdmin = new \Pjango\Core\Models\PjangoMediaAdmin();
 	
 		$q = Doctrine_Query::create()
 			->from('PjangoMedia o')
 			->where('o.content_type_id = ? AND o.object_id = ?', array($contentType->id, $id));
 	
-		$cl = new \Pjango\Contrib\Admin\ChangeList($q);
+		$cl = new \Pjango\Contrib\Admin\ChangeList($app_label, 'PjangoMedia', $q, 
+			$pjangoMediaAdmin->list_display, 
+			$pjangoMediaAdmin->list_display_links, 
+			$pjangoMediaAdmin->list_filter, 
+			$pjangoMediaAdmin->date_hierarchy, 
+			$pjangoMediaAdmin->search_fields, 
+			$pjangoMediaAdmin->list_per_page, 
+			$pjangoMediaAdmin->row_actions,
+			$pjangoMediaAdmin->actions);
 		$templateArr['cl'] = $cl;
 	
+		$templateArr['third_level_navigation'] = $modelAdmin->get_third_level_navigation('files', $modelUrl, $id);
 		$templateArr['has_add_permission'] = $request->user->has_perm($app_label.'.can_add_'.$model);
 		$templateArr['has_delete_permission'] = $request->user->has_perm($app_label.'.can_delete_'.$model);
 		render_to_response('admin/change_list.html', $templateArr);
@@ -46,21 +46,9 @@ class AdminViews {
 		$templateArr = array('current_admin_menu'=>$app_label,
 				'current_admin_submenu'=>$model,
 				'current_admin_submenu2'=>$model,
-				'title'=>__($model.' images'));
+				'title'=>__(sprintf('%s %s Files', $app_label,$model)));
 	
-		$templateArr['extraheads'] = array(
-				sprintf('<script type="text/javascript" src="%s/js/filemanager/filemanager.js"></script>', pjango_ini_get('ADMIN_MEDIA_URL')),
-				sprintf('<script type="text/javascript" src="%s/js/PjangoMedia_addchange.js"></script>', pjango_ini_get('ADMIN_MEDIA_URL'))
-		);
-		
-		$coreApps = array('Post');
-		
 		$modelAdminClass = sprintf('%s\Models\%sAdmin', $app_label, $model);
-		
-		if(in_array($app_label, $coreApps)){
-			$modelAdminClass = sprintf('Pjango\Contrib\%s\Models\%sAdmin', $app_label, $model);
-		}		
-		 
 		$modelAdmin = new $modelAdminClass();
 		$modelUrl = sprintf('%s/admin/%s/%s/',pjango_ini_get('SITE_URL'), $app_label, $model);
 		$modelClass = $model;
@@ -68,20 +56,7 @@ class AdminViews {
 		$formClass  = 'Pjango\Core\Forms\PjangoMediaForm';
 		$formData   = array();
 	
-		if(is_array($modelAdmin->third_level_navigation)){
-	    	for ($i = 0; $i < count($modelAdmin->third_level_navigation); $i++) {
-	    		$modelAdmin->third_level_navigation[$i]['url'] = $modelUrl.$id."/".$modelAdmin->third_level_navigation[$i]['key']."/";
-	    		if($modelAdmin->third_level_navigation[$i]['key'] == 'files'){
-	    			$modelAdmin->third_level_navigation[$i]['class'] = 'active';
-	    			
-	    			if (isset($modelAdmin->third_level_navigation[$i+1])){
-	    				$modelAdmin->third_level_navigation[$i+1]['class'] = 'passive after-active';
-	    			}
-	    		}
-	    	}
-	    		    	      	
-        	$templateArr['third_level_navigation'] = $modelAdmin->third_level_navigation;
-        } 
+		$templateArr['third_level_navigation'] = $modelAdmin->get_third_level_navigation('files', $modelUrl, $id);
 	
 		$modelObj = Doctrine_Core::getTable($model)->find($id);
 	
@@ -138,7 +113,7 @@ class AdminViews {
 					$imageObj->updated_by = $request->user->id;
 				}
 	
-				$imageObj->site_id = pjango_ini_get('SITE_ID');
+				$imageObj->site_id = SITE_ID;
 				$imageObj->save();
 	
 				Messages::Info(pjango_gettext('The operation completed successfully'));
@@ -180,13 +155,6 @@ class AdminViews {
 	    				'current_admin_submenu2'=>$model,
 	    				'title'=>__($app_label.' '.$model.' List')); 
 	    
-	    $coreApps = array('Post', 'Pages');
-	    if(in_array($app_label, $coreApps)){
-	    	$app_label2 = sprintf('Pjango\Contrib\%s', $app_label);
-	    }else {
-	    	$app_label2 = $app_label;
-	    }    
-	    
 	    if(!$request->user->has_perm($app_label.'.can_show_'.$model)){
 	    	Messages::Error('You are not authorized to perform this operation.');
 	    	HttpResponseRedirect("/admin/");
@@ -198,19 +166,27 @@ class AdminViews {
 	        ->from($model.' o');
 	    
 	    if($modelTable->getColumnDefinition('site_id')){
-	        $q->addWhere('o.site_id = ? ', array(pjango_ini_get('SITE_ID')));
+	        $q->addWhere('o.site_id = ? ', array(SITE_ID));
 	    }
 	    
 	    if($model == 'Post'){
 	        $q->addWhere('o.post_type = ?', array($app_label));	        
 	    }
 	    
-	    $cl = new Pjango\Contrib\Admin\ChangeList($q);
+	    $cl = new Pjango\Contrib\Admin\ChangeList($app_label, $model, $q);
 	    $templateArr['cl'] = $cl;	    
-	
-	    $templateArr['has_add_permission'] = $request->user->has_perm($app_label2.'.can_add_'.$model);
-	    $templateArr['has_delete_permission'] = $request->user->has_perm($app_label2.'.can_delete_'.$model);
-	    render_to_response('admin/change_list.html', $templateArr);
+	    
+	    if(is_file(sprintf('%s/templates/%s/admin/change_list.html', SITE_PATH, strtolower($app_label)))){
+	    	$templateFile = sprintf('%s/admin/change_list.html', strtolower($app_label));	    	
+	    }else if(is_file(sprintf('%s/templates/%s/admin/change_list.html', APPLICATION_PATH, strtolower($app_label)))){
+	    	$templateFile = sprintf('%s/admin/change_list.html', strtolower($app_label));
+	    }else {
+	    	$templateFile = 'admin/change_list.html';
+	    }
+	    
+	    $templateArr['has_add_permission'] = $request->user->has_perm($app_label.'.can_add_'.$model);
+	    $templateArr['has_delete_permission'] = $request->user->has_perm($app_label.'.can_delete_'.$model);
+	    render_to_response($templateFile, $templateArr);
 	}	
 	
 	function app_addchange($request, $app_label=false, $model=false, $id=false) {
@@ -222,8 +198,8 @@ class AdminViews {
 	    $site = \Pjango\Contrib\Admin\AdminSite::getInstance();
 	    $contentType = ContentType::get_for_model($model, $app_label);
 	    
-	    $modelAdminClass = $site->_registry[$model];
-	    $modelUrl = sprintf('%s/admin/Accounting/%s/',pjango_ini_get('SITE_URL'), $model);	    
+	    $modelAdminClass = $site->_registry[$app_label][$model];
+	    $modelUrl = sprintf('%s/admin/%s/%s/',pjango_ini_get('SITE_URL'), $app_label, $model);	    
 	    
 	    $modelAdminClassArr = explode('\\', $modelAdminClass);
 	    $modelAdminClassArrTmp = array();
@@ -274,7 +250,7 @@ class AdminViews {
 	            if(!$modelObj) $modelObj = new $model();
 	            
 // 	            if contains site_id field
-	            $formData['site_id'] = pjango_ini_get('SITE_ID');
+	            $formData['site_id'] = SITE_ID;
 	            
 // 	            if contains created_by and updated_by  field	            
 	            if ($modelObj->state() == Doctrine_Record::STATE_TCLEAN){
@@ -368,22 +344,7 @@ class AdminViews {
 		$formClass = sprintf('%s\Forms\%sMetaForm', $app_label, $model);
 		$formData = array();
 		
-		$contentType = ContentType::get_for_model($modelClass);
-	
-	    if(is_array($modelAdmin->third_level_navigation)){
-	    	for ($i = 0; $i < count($modelAdmin->third_level_navigation); $i++) {
-	    		$modelAdmin->third_level_navigation[$i]['url'] = $modelUrl.$id."/".$modelAdmin->third_level_navigation[$i]['key']."/";
-	    		if($modelAdmin->third_level_navigation[$i]['key'] == 'meta'){
-	    			$modelAdmin->third_level_navigation[$i]['class'] = 'active';
-	    			
-	    			if (isset($modelAdmin->third_level_navigation[$i+1])){
-	    				$modelAdmin->third_level_navigation[$i+1]['class'] = 'passive after-active';
-	    			}
-	    		}
-	    	}
-	    		    	      	
-        	$templateArr['third_level_navigation'] = $modelAdmin->third_level_navigation;
-        }    
+		$contentType = ContentType::get_for_model($modelClass, $app_label);
         
         if ($id){
         	$modelObj = Doctrine_Query::create()
@@ -400,14 +361,14 @@ class AdminViews {
         }  
 
         if ($request->POST){
-        	PjangoMeta::setMeta($contentType->id, $modelObj->id, false, $_POST);
+        	PjangoMeta::setMeta($contentType->id, $modelObj->id, false, $request->POST);
         	Messages::Info(pjango_gettext('The operation completed successfully'));
         	HttpResponseRedirect(sprintf('/admin/%s/%s/%d/edit/', $app_label, $model, $modelObj->id));
         }
 	
         if (!$form) $form = new $formClass($formData);
-        $templateArr['addchange_form'] = $form->as_list();
-    
+        $templateArr['addchange_form'] = $form;
+        $templateArr['third_level_navigation'] = $modelAdmin->get_third_level_navigation('meta', $modelUrl, $id);
         render_to_response('admin/addchange.html', $templateArr);
 	}	
 	
@@ -432,7 +393,7 @@ class AdminViews {
 	    $q = Doctrine_Query::create()
     	    ->select('s.category, COUNT(s.category) AS count')
     	    ->from('Settings s')
-    	    ->where('s.site_id = ?', pjango_ini_get('SITE_ID'))
+    	    ->where('s.site_id = ?', SITE_ID)
     	    ->groupBy('s.category');
 	
 	    $templateArr['settings_category'] = $q->fetchArray();

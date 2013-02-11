@@ -76,3 +76,42 @@ function translation($obj, $param){
 	return  $translation[$param];
 }
 
+
+function slugify($text){
+	$text = str_replace('&', ' and ', $text);
+
+	if(strlen($text) > 100) {
+		$text = substr($text, 0, 100);
+	}
+
+	// convert all characters to ascii equivalent.
+	$map = array(
+		'/à|á|å|â/' 	=> 'a',
+		'/è|é|ê|ẽ|ë/' 	=> 'e',
+		'/ì|í|î/' 		=> 'i',
+		'/ò|ó|ô|ø/' 	=> 'o',
+		'/ù|ú|ů|û/' 	=> 'u',
+		'/ç/' 			=> 'c',
+		'/ñ/' 			=> 'n',
+		'/ä|æ/' 		=> 'ae',
+		'/ö/' 			=> 'o',
+		'/ü/'			=> 'u',
+		'/Ä/' 			=> 'A',
+		'/Ü/' 			=> 'U',
+		'/Ö/' 			=> 'O',
+		'/ß/' 			=> 's',
+		'/[^\w\s]/' 	=> ' ');
+
+	// remove any non letter or digit
+	$text = preg_replace(array_keys($map), array_values($map), $text);
+	$text = preg_replace('~[^\w\d]+~u', '-', $text);
+
+	// trim
+	$text = trim($text, '-');
+
+	// lowercase
+	$text = strtolower($text);
+
+	return $text;
+}
+

@@ -1,12 +1,19 @@
 <?php 
 namespace Pjango\Contrib\Auth\Forms;
 use Pjango\Phorm,
-    Pjango\Phorm\Fields\HiddenField,
+    Pjango\Phorm\Fields\MultipleChoiceField,
     Pjango\Phorm\Fields\TextField;
 
 class GroupForm extends Phorm {
     protected function define_fields(){
-        $this->id = new HiddenField();
-        $this->name = new TextField(pjango_gettext('Name'), 35, 255, array('validate_required'));
+    	
+    	$multiCheckboxWidgetOptions = array(
+    	    			'widget_class'=>'Pjango\Phorm\Fields\MultiSelectWidget',
+    	    			'validate_choices'=>false
+    	);
+    	    	
+        $this->name = new TextField(__('Name'), 35, 255, array('validate_required'));
+        $this->permissions = new MultipleChoiceField(__('User Permissions'), \Permission::findAllAsChoice(),
+        		array(),array(), $multiCheckboxWidgetOptions);        
     }
 }

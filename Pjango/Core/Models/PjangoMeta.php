@@ -13,10 +13,9 @@
 class PjangoMeta extends BasePjangoMeta
 {
 	public static function getMeta($contentTypeId, $objectId, $metaKey = false) {
-	    $isteId = pjango_ini_get('SITE_ID');
 		$q = Doctrine_Query::create()
 			->from('PjangoMeta pm')
-			->addWhere('pm.site_id = ? AND pm.content_type_id = ? AND pm.object_id = ?', array($isteId, $contentTypeId, $objectId));
+			->addWhere('pm.site_id = ? AND pm.content_type_id = ? AND pm.object_id = ?', array(SITE_ID, $contentTypeId, $objectId));
 		
 		if ($metaKey){
 			$q = $q->addWhere('pm.meta_key = ?', $metaKey)
@@ -45,9 +44,7 @@ class PjangoMeta extends BasePjangoMeta
 	}
 	
 	public static function setMeta($contentTypeId, $objectId, $metaKeys = false, $metaValues = false) {
-	    $isteId = pjango_ini_get('SITE_ID');
-		
-// 		metaları bul
+		// 		metaları bul
 		if (!is_array($metaKeys)){
 			$metaKeys = array();
 			// 		meta_
@@ -67,7 +64,7 @@ class PjangoMeta extends BasePjangoMeta
 				if (!$meta) $meta = new PjangoMeta();
 					
 				$meta->content_type_id = $contentTypeId;
-				$meta->site_id = $isteId;
+				$meta->site_id = SITE_ID;
 				$meta->object_id = $objectId;
 				$meta->meta_key = $key;
 				

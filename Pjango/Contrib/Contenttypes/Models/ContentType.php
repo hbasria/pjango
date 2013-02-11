@@ -58,11 +58,14 @@ class ContentType extends BaseContentType
 	}	
 	
 	public function get_object_for_this_type($id) {
-		$obj = Doctrine_Query::create()
-	            ->from($this->model.' m')          
-				->where('m.id = ?',$id)
-	            ->fetchOne(); 		
-		if ($obj) return $obj;
-		else return false;		
+		if(strlen($this->model)>0){
+			$obj = Doctrine_Query::create()
+				->from($this->model.' o')
+				->where('o.id = ?',$id)
+				->fetchOne();		
+			if ($obj) return $obj;
+		}
+
+		return false;		
 	}
 }

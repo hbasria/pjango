@@ -16,10 +16,12 @@ class ModelAdmin {
     public $save_as = false;
     public $save_on_top = false;
     public $ordering = false;
-    public $actions = array();
-    public $row_actions = array();
+    public $actions = array('add');
+    public $row_actions = array('edit', 'delete');
 
     public $admin_menu = false;
+    public $apps_menu = false;
+    
     public $extraheads = false;
     public $third_level_navigation = false;
     

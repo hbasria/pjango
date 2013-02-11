@@ -33,8 +33,8 @@ class DateTimeField extends TextField
     public function validate($value)
     {
         parent::validate($value);
-        if (!strtotime($value))
-        throw new ValidationError("Date/time format not recognized.");
+        //if (!strtotime($value))
+        //throw new ValidationError("Date/time format not recognized.");
     }
 
     /**
@@ -46,13 +46,15 @@ class DateTimeField extends TextField
      **/
     public function import_value($value)
     {
-        $value = parent::import_value($value);
-        return date('Y-m-d H:i:s', strtotime($value));
+    	$value = parent::import_value($value);
+    	$simpleDate = \Pjango\Util\SimpleDate::parse($value, pjango_ini_get('DATETIME_FORMAT'));
+    	return $simpleDate->toString();
     }
     
     public function export_value($value)
     {
-    	if(strlen(trim($value))<=0) $value = 'now';    
-        return date(pjango_ini_get('DATETIME_FORMAT'), strtotime($value));
+    	if(strlen(trim($value))<=0) $value = date('Y-m-d H:i');
+    	$simpleDate = \Pjango\Util\SimpleDate::parse($value, 'Y-m-d H:i');
+    	return $simpleDate->toString(pjango_ini_get('DATETIME_FORMAT'));
     }     
 }

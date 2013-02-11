@@ -14,9 +14,9 @@ class Group extends BaseGroup
 {
 	public static function findAllAsChoice() {
 		$choicesArr = Doctrine_Query::create()
-		->select('o.id, o.name')
-		->from('Group o')
-		->fetchArray();
+			->select('o.id, o.name')
+			->from('Group o')
+			->fetchArray();
 
 		$choices = array();
 		foreach ($choicesArr as $value) {

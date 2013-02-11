@@ -1,17 +1,27 @@
 <?php 
 #{% post 'post-slug' as shortcut %}
 class Post_Tag extends H2o_Node {
+	private $taxonomy = 'Post';
+	private $slug = 'Post';
+	
     function __construct($argstring, $parser, $pos=0) {
     	$this->args = H2o_Parser::parseArguments($argstring);      
     	$this->shortcut = str_replace(':', '', $this->args[2]);
     }
     
     function render($context, $stream) {
+    	$postSlug = '';
     	
-    	$postSlug = str_replace('"', '', $this->args[0]);    	
-    	$postSlug = str_replace("'", '', $postSlug);
+    	if(is_array($this->args[0])){
+			foreach ($this->args[0] as $key => $value) {
+				if ($key == 'slug') $this->slug = str_replace(array('"',"'"), array('',''), $value);
+				if ($key == 'taxonomy') $this->taxonomy = str_replace(array('"',"'"), array('',''), $value);
+			}			
+    	}else {
+    		$this->slug = str_replace(array('"',"'"), array('',''), $this->args[0]);
+    	}
     	
-    	$post = Post::findBySlug($postSlug);
+    	$post = Post::findBySlug($this->slug, $this->taxonomy);
     	
     	if($post){
     	    $context->push(array($this->shortcut => $post));    	    
@@ -19,32 +29,49 @@ class Post_Tag extends H2o_Node {
     }
 }
 
-H2o::addTag(array('post'));
 
-#{% get_posts as shortcut taxonomy:"post", category__slug:"" %}
+
+#{% get_posts as shortcut taxonomy:"Post", category__slug:"" %}
 class Get_Posts_Tag extends H2o_Node {
+	private $taxonomy = 'Post';
+	private $categorySlug = false;
+	private $limit = 25;
+	
     function __construct($argstring, $parser, $pos=0) {
         $this->args = H2o_Parser::parseArguments($argstring);
         $this->shortcut = str_replace(':', '', $this->args[1]);
-        $this->params = $this->args[2];
     }
 
     function render($context, $stream) {
+    	
+    	if(is_array($this->args[2])){
+    		foreach ($this->args[2] as $key => $value) {
+    			if ($key == 'taxonomy') $this->taxonomy = str_replace(array('"',"'"), array('',''), $value);
+    			if ($key == 'category__slug') $this->categorySlug = str_replace(array('"',"'"), array('',''), $value);    	
+    			if ($key == 'limit') $this->limit = intval($value);
+    		}
+    	}    	
+    	
         $q = Doctrine_Query::create()
             ->from('Post p')
             ->leftJoin('p.Translation t')
             ->leftJoin('p.Categories c')
             ->leftJoin('c.Translation ct')
-            ->where('p.status = ? AND c.site_id = ?',array(POST::STATUS_PUBLISHED, pjango_ini_get('SITE_ID')))
-            ->orderBy('p.weight DESC, p.created_at DESC');
+            ->where('p.site_id = ? AND p.status = ?',array(SITE_ID, Post::STATUS_PUBLISHED))
+            ->orderBy('p.weight DESC, p.created_at DESC')
+        	->limit($this->limit);        
         
-        if(isset($this->params['taxonomy'])){
-            $q->addWhere('c.taxonomy = ?', str_replace(array('"',"'"), '', $this->params['taxonomy']));
+        if($this->taxonomy){
+            $q->addWhere('p.post_type = ?', $this->taxonomy);
         }
         
-        if(isset($this->params['category__slug'])){
-            $q->addWhere('ct.slug = ?', str_replace(array('"',"'"), '', $this->params['category__slug']));
-        }        
+        if($this->categorySlug){
+        	$postCategory = PostCategory::findBySlug($this->categorySlug, $this->taxonomy);
+        	
+        	if($postCategory){
+        		$q->addWhere('c.lft >= ? AND c.rgt <= ?', array($postCategory->lft, $postCategory->rgt));
+        	}            
+        }  
         
         $context->push(array($this->shortcut => $q->execute()));
     }
@@ -242,4 +269,6 @@ class Post_Category_Tree_Tag extends H2o_Node {
 	}
 }
 
+
+H2o::addTag(array('post'));
 H2o::addTag(array('post_category_tree'));

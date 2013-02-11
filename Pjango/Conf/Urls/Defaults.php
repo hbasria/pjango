@@ -104,10 +104,10 @@ function render_to_response($templateFile, $templateArr, $isReturn = false){
 
         echo json_encode($templateArr);
     }else{
+    	
         $templateArr = array_merge($templateArr, $GLOBALS['SETTINGS']);
-         
-        $templateArr['user'] = User::get_current();
-         
+        
+        $templateArr['user'] = User::get_current();         
         $h2oConfig = pjango_ini_get('H2O_CONFIG');
         
         $template = new H2o($templateFile, $h2oConfig);
@@ -118,6 +118,7 @@ function render_to_response($templateFile, $templateArr, $isReturn = false){
          
         $templateArr['request'] = $_REQUEST;
         $templateArr['request']['is_mobile'] = is_mobile();
+        
         echo $template->render($templateArr);
     }
 

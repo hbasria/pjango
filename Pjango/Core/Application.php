@@ -18,9 +18,7 @@ class Application {
 
 
     public function __construct(){
-        require_once  APPLICATION_PATH.'/settings.php';
         
-        $GLOBALS['SETTINGS'] = array_merge($GLOBALS['SETTINGS'], $SETTINGS);
     }
 
     public static function getInstance(){
@@ -68,7 +66,8 @@ class Application {
     	return $this->_loadedModels = $param;
     }
     
-    public function run($environment, $options = array()){
+    public function run($environment = 'DEV', $options = array()){
+    	define('APPLICATION_ENV',(string) $environment);
         $this->_environment = (string) $environment;
         $options['environment'] = $this->_environment;
         $this->getBootstrap()->run($options);

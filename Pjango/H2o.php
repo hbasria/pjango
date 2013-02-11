@@ -72,7 +72,7 @@ class H2o {
             } else {
                 $this->searchpath = getcwd().DS;
             }
-
+            
             $loader_searchpath = is_array($this->searchpath) ? $this->searchpath : array($this->searchpath);
             $this->loader = new $loader($loader_searchpath, $this->options);        
         }

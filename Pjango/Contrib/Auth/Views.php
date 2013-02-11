@@ -1,7 +1,6 @@
 <?php
 
-use Pjango\Contrib\Auth\Forms\LoginForm,
-    Pjango\Util\Messages;
+use Pjango\Util\Messages;
 
 class AuthViews {
 
@@ -16,7 +15,7 @@ class AuthViews {
 		}		
 
 		if ($request->POST){
-			$form = new LoginForm($request->POST);
+			$form = new Pjango\Contrib\Auth\Forms\LoginForm($request->POST);
 			
 			try {
 			    if (!$form->is_valid()) throw new Exception(pjango_gettext('There are some errors, please correct them below.'));
@@ -30,7 +29,7 @@ class AuthViews {
 			}			
 		}
 
-		if (!$form) $form = new LoginForm($formData);
+		if (!$form) $form = new Pjango\Contrib\Auth\Forms\LoginForm($formData);
 		
 		$templateArr['addchange_form'] = $form->as_list();
 
@@ -54,7 +53,8 @@ class AuthViews {
 	function admin_user_addchange($request, $id = false) {
 	    $templateArr = array('current_admin_menu'=>'Auth', 
 	    		'current_admin_submenu'=>'Auth',
-	            'current_admin_submenu2'=>'User');
+	            'current_admin_submenu2'=>'User',
+	    		'title'=>'Auth User Add/Change');
 	    
 	    $modelClass = 'User';
 	    $formClass = 'Pjango\Contrib\Auth\Forms\UserForm';
@@ -66,12 +66,24 @@ class AuthViews {
 	    }
 	
 	    if ($id){
-	        $modelObj = Doctrine::getTable($modelClass)->find($id);
+	        $modelObj = Doctrine_Query::create()
+		        ->from($modelClass.' u')
+		        ->leftJoin('u.UserGroups')
+		        ->leftJoin('u.UserPermissions')
+		        ->where('u.id = ?', $id)
+		        ->fetchOne();
+	        
 	        if ($modelObj) {
 	            $formData = $modelObj->toArray();
-	            unset($formData['password']);
-	            $templateArr['user_permissions'] = $modelObj->UserPermissions;
-	            $templateArr['user_groups'] = $modelObj->UserGroups;
+	            unset($formData['password']);	       
+	            
+	            foreach ($modelObj->UserGroups as $userGroup) {
+	            	$formData['groups'][] = $userGroup->group_id;
+	            }
+	            
+	            foreach ($modelObj->UserPermissions as $userPermission) {
+	            	$formData['permissions'][] = $userPermission->permission_id;
+	            }
 	        }
 	    }
 	
@@ -117,7 +129,7 @@ class AuthViews {
 	            $modelObj->unlink('Groups');
 	            $modelObj->link('Permissions', $request->POST['permissions']);
 	            $modelObj->link('Groups', $request->POST['groups']);	
-	            $modelObj->site_id = pjango_ini_get('SITE_ID');
+	            $modelObj->site_id = SITE_ID;
 	            $modelObj->save();
 	            
 	            Messages::Info(pjango_gettext('The operation completed successfully'));
@@ -125,30 +137,19 @@ class AuthViews {
 
             } catch (Exception $e) {
                 Messages::Error($e->getMessage());
-            }	            
-	
-
+            }	            	
 	    }
 	
-	    $templateArr['permissions'] = Doctrine_Query::create()
-    	    ->from('Permission')
-    	    ->execute();
-	
-	    $templateArr['groups'] = Doctrine_Query::create()
-    	    ->from('Group g')
-    	    ->where('g.site_id = ?', pjango_ini_get('SITE_ID'))
-    	    ->execute();
-	
 	    if (!$form) $form = new $formClass($formData);
-	
-	    $templateArr['addchange_form'] = $form->as_list();
-	    render_to_response('auth/admin/user_addchange.html', $templateArr);
+	    $templateArr['addchange_form'] = $form;
+	    render_to_response('admin/addchange.html', $templateArr);
 	}
 
 	function admin_group_addchange($request, $id = false) {
 	    $templateArr = array('current_admin_menu'=>'Auth',
     		'current_admin_submenu'=>'Auth',
-            'current_admin_submenu2'=>'Group');
+            'current_admin_submenu2'=>'Group',
+	    	'title'=>'Auth Group Add/Change');
 	     
 	    $modelClass = 'Group';
 	    $formClass = 'Pjango\Contrib\Auth\Forms\GroupForm';
@@ -183,7 +184,7 @@ class AuthViews {
 	             
 	            $modelObj->unlink('Permissions');
 	            $modelObj->link('Permissions', $request->POST['permissions']);
-	            $modelObj->site_id = pjango_ini_get('SITE_ID');
+	            $modelObj->site_id = SITE_ID;
 	            $modelObj->save();
 	             
 	            Messages::Info(pjango_gettext('The operation completed successfully'));
@@ -202,7 +203,7 @@ class AuthViews {
 	
 	    if (!$form) $form = new $formClass($formData);
 	
-	    $templateArr['addchange_form'] = $form->as_list();
-	    render_to_response('auth/admin/group_addchange.html', $templateArr);
+	    $templateArr['addchange_form'] = $form;
+	    render_to_response('admin/addchange.html', $templateArr);
 	}	
 }

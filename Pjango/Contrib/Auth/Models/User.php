@@ -39,11 +39,11 @@ class User extends BaseUser
 	public static function authenticate($username = false, $password = false, $userId = false){
 		 
 		$q = Doctrine_Query::create()
-		->from('User u')
-		->leftJoin('u.Groups')
-		->leftJoin('u.Permissions')
-		->leftJoin('u.Site')
-		->where('u.site_id = ?', 1);
+			->from('User u')
+			->leftJoin('u.Groups')
+			->leftJoin('u.Permissions')
+			->leftJoin('u.Site')
+			->where('u.site_id = ?', 1);
 	
 		if($userId){
 			$q->addWhere('u.id = ? AND u.is_active = ?', array($userId,1));
@@ -54,7 +54,7 @@ class User extends BaseUser
 		 
 		$user = $q->fetchOne();
 		 
-		if (!$user) throw new Exception(pjango_gettext('Authentication failed'));
+		if (!$user) throw new Exception(__('Authentication failed'));
 		 
 		//cooki set et beni hatırla için
 		if (isset($_POST['remember_me'])){
@@ -278,7 +278,7 @@ class User extends BaseUser
 	public function send_registration_email() {
 		$mail = get_mailer('smtp');
 		$mail->Subject = sprintf('%s %s',$mail->Subject,__('New Registration'));
-		$mail->MsgHTML(render_to_response('mail/registration.html', array('registraion_user'=>$this), true));
+		$mail->MsgHTML(render_to_response('mail/registration.html', array('registration_user'=>$this), true));
 		$mail->AddAddress($this->email, $this->displayname);
 		$mail->Send();
 	}	

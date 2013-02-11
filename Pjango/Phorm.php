@@ -299,15 +299,19 @@ abstract class Phorm
     {
         if ( $reprocess || is_null($this->valid) )
         {
-            if ( $this->is_bound() )
-            {
-                foreach($this->fields as $name => &$field)
-                    if ( !$field->is_valid($reprocess) )
-                        $this->errors[$name] = $field->get_errors();
+            if ( $this->is_bound() ){
+            	$arrayKeys = array_keys($this->fields);
+            	for ($i = 0; $i < count($this->fields); $i++) {
+            		if ( !$this->fields[$arrayKeys[$i]]->is_valid($reprocess) ){
+            			$this->errors[$arrayKeys[$i]] = $this->fields[$arrayKeys[$i]]->get_errors();
+            		}            			            		
+            	}
+
                 $this->valid = ( count($this->errors) === 0 );
             }
             if ( $this->valid && $this->is_bound() ) $this->clean_data();
         }
+
         return $this->valid;
     }
     
@@ -355,7 +359,7 @@ abstract class Phorm
             $method = "GET";
         }
         
-        return sprintf('<form id="%s" name="%s" method="%s" action="%s"%s>',
+        return sprintf('<form id="%s" name="%s" method="%s" action="%s" class="form-horizontal" %s>',
         	$this->_id, $this->_name, $method,
             htmlentities((string)$target), ($this->multi_part) ? ' enctype="multipart/form-data"' : ''
         );
@@ -421,6 +425,60 @@ abstract class Phorm
         }
         return implode($elts);
     }
+    
+    public function as_bootstrap()
+    {
+    	$elts = array();
+    	foreach ($this->fields as $name => $field)
+    	{
+    		$label = $field->label();
+    		$mainDivClass = 'control-group';
+    		$fieldErrors = $field->get_errors();
+    		
+    		if (is_array($fieldErrors) && count($fieldErrors) > 0){
+    			$mainDivClass .= ' error';    			
+    		}
+    		
+    		$extendingControlsPrepend = '';
+    		$extendingControlsAppend = '';    		
+    		
+    		$pMapFieldPos = strpos($field->html(), 'pMapField');
+    		if ($pMapFieldPos !== false) {
+    			$fieldId = $field->get_attribute('id');
+    			
+    			$extendingControlsPrepend = '<div class="input-append">';   
+    			
+    			$extendingControlsPrepend .= '
+    				<div id="'.$fieldId.'_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="'.$fieldId.'_modalLabel" aria-hidden="true">
+    					<div class="modal-header">
+    						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    						<h3 id="'.$fieldId.'_modalLabel">Find Coordinate </h3>    			
+    					</div>
+    					<div class="modal-body">
+    						<iframe id="'.$fieldId.'_iframe" frameborder="0" allowtransparency="true" src="'.pjango_ini_get('SITE_URL').'/find-coordinate/" width="100%" height="270"></iframe>
+    					</div>
+    					<div class="modal-footer">    			
+    						<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    						<button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" onclick="pMapFieldSet(\''.$fieldId.'\')">Save changes</button>
+    					</div>
+    				</div>';
+    			
+    			$extendingControlsAppend = '<span class="add-on"><a href="#'.$fieldId.'_modal" data-toggle="modal"><i class="icon-globe"></i></a></span></div>';    			
+    		}
+    		
+    		$pDateTimeFieldPos = strpos($field->html(), 'pDateTimeField');
+    		if ($pDateTimeFieldPos !== false) {
+    			$extendingControlsPrepend = '<div class="input-append">';
+    			$extendingControlsAppend = '<span class="add-on"><i class="icon-calendar"></i></span></div>';
+    		}    		
+
+    		if ($label !== '')
+    			$elts[] = sprintf('<div class="%s">%s <div class="controls">%s %s %s %s %s </div></div>', $mainDivClass, $field->label(), $extendingControlsPrepend, $field->html(), $extendingControlsAppend, $field->help_text(), $field->errors());
+    		else
+    			$elts[] = strval($field);
+    	}
+    	return implode($elts);
+    }    
 }
 
 

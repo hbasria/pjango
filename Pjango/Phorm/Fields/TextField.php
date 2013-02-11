@@ -49,7 +49,7 @@ class TextField extends PhormField
     protected function validate($value)
     {
         if (strlen($value) > $this->max_length)
-        throw new ValidationError('Must be fewer than {$this->max_length} characters in length.');
+        throw new Exception('Must be fewer than {$this->max_length} characters in length.');
     }
 
     /**

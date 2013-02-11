@@ -9,26 +9,12 @@ class Get_Messages_Tag extends H2o_Node {
     
     function render($contxt, $stream) {
         $messages = array();
-        $messagesTemplate = ' 
-        		<div class="messagePlaceholder" id="messagePlaceholder">
-	      			<div class="message localMessage">
-	      				<div class="%s">
-	      					<div class="icon"></div>
-		      				%s
-		      				<div class="topleft"></div>
-		      				<div class="topright"></div>
-		      				<div class="bottomleft"></div>
-		      				<div class="bottomright"></div>
-		      				<div class="close">x</div>
-	      				</div>
-	      			</div>
-	      		</div>';
+        $messagesTemplate = '<div class="alert alert-%s">%s</div>';
         
-        $messagesClass = 'confirm';
+        $messagesClass = 'info';
         if (is_array($_SESSION['MESSAGES'])){
             foreach ($_SESSION['MESSAGES'] as $value) {
-                $messages[] = '<p>'.$value['message'].'</p>';
-                
+                $messages[] = '<p>'.$value['message'].'</p>';                
                 if ($value['priority'] == Messages::ERROR) $messagesClass = 'error';
             }
         }

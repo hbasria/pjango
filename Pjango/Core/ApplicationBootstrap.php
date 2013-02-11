@@ -8,6 +8,7 @@ require_once 'Pjango/H2o.php';
 
 class ApplicationBootstrap {
     protected $_application;
+    protected $_options = array();
     protected $_connection;
     protected $_loadedModels;
 
@@ -17,39 +18,34 @@ class ApplicationBootstrap {
     }
 
     public function run($options = array()){
-        global $urlpatterns;
-                
+    	global $urlpatterns;
         $classLoader = new ClassLoader('Pjango');
         $classLoader->register();
         
-        $this->init_set();
-        $this->init_session();        
+        
+        
+        $this->init_session();
         $this->init_sites();        
         $this->init_logging();                
         $this->init_locale();
         $this->init_apps();        
         $this->init_h2o();
+        $this->init_settings();   
 
-        $this->init_settings();
-
-        $urlpatterns = array();
         $rootUrls = reverse(pjango_ini_get('ROOT_URLCONF'));
-        
         
         if($rootUrls){                        
             require $rootUrls;
-        }
+        }       
         
         $this->_application->setLoadedModels($this->_loadedModels);
 
         if(isset($options['console']) && $options['console'] == true){
 			echo "pjango application running ".$options['environment']." mode...\n";
         }else {
-            $request = new Request();
+            $request = new Request();            
             $request->request();
         }
-
-
     }
 
     protected function init_set(){
@@ -67,8 +63,9 @@ class ApplicationBootstrap {
     }
 	
     protected function init_sites(){
-    	
+    	global $SETTINGS;
     	$multipleSite = pjango_ini_get('MULTIPLE_SITE');
+    	
         if (is_array($multipleSite)) {
             $rootServers = $multipleSite['ROOT_SERVERS'];
             $serverNames = explode('.', $_SERVER["SERVER_NAME"]);            
@@ -129,15 +126,22 @@ class ApplicationBootstrap {
             }         
             
         }else {
-        	define('SITE_PATH', APPLICATION_PATH);
-            if (is_file(SITE_PATH.'/settings.php')){
-                require SITE_PATH.'/settings.php';
-                $GLOBALS['SETTINGS'] = array_merge($GLOBALS['SETTINGS'], $SETTINGS);
-            }            
-            define('SITE_ID',1);
-            pjango_ini_set('SITE_ID', 1); //deprecet
+        	require_once  APPLICATION_PATH.'/settings.php';
+        	$GLOBALS['SETTINGS'] = array_merge($SETTINGS, $GLOBALS['SETTINGS']);
+        	
+        	if(SITE_PATH != 'SITE_PATH'){
+	        	if (is_file(SITE_PATH.'/settings.php')){
+	                require SITE_PATH.'/settings.php';
+	                $GLOBALS['SETTINGS'] = array_merge($SETTINGS, $GLOBALS['SETTINGS']);
+	            }   
+        	}
+        	define('SITE_ID',1);
+        	$this->init_set();
             $this->init_doctrine();
-        }                
+            
+        }   
+
+        
     }
 
     protected function init_locale(){
@@ -163,6 +167,7 @@ class ApplicationBootstrap {
 	protected function init_doctrine($proxyDir = null){            
             $env = $this->_application->getEnvironment();
             $databases = pjango_ini_get('DATABASES');
+            
             if($databases){
                 require_once 'Doctrine.php';
                 spl_autoload_register(array('Doctrine', 'autoload'));
@@ -178,7 +183,7 @@ class ApplicationBootstrap {
                 
                 $this->_connection = $doctrineManager->openConnection($databases[$env], 'doctrine');
                 $this->_connection->setCharset('utf8');
-                $this->_connection->setCollate('utf8_turkish_ci');      
+                $this->_connection->setCollate('utf8_turkish_ci');                     
             }
 	}
 	
@@ -263,14 +268,12 @@ class ApplicationBootstrap {
 
     protected function init_settings(){
         if(pjango_ini_get('DATABASES')){
-            $siteId = pjango_ini_get('SITE_ID');
-            
             try {
     	        $settings = \Doctrine_Query::create()
                     ->from('Settings s')
-                    ->where('s.site_id = ?', $siteId)
+                    ->where('s.site_id = ?', SITE_ID)
                     ->execute();
-
+    	        
         	        foreach ($settings as $setting_item) {
         	            pjango_ini_set($setting_item->name, $setting_item->value);
         	        }

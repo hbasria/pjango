@@ -59,6 +59,11 @@ class MultiCheckboxWidget extends PhormWidget
         $options = array();
         foreach($this->choices as $actual => $display)
         {
+        	if(is_array($display)){
+        		if (isset($display['id'])) $actual = $display['id'];
+        		if (isset($display['name'])) $display = $display['name'];
+        	}
+        	
             $option_attributes = array('value' => $this->clean_string($actual));
             if (in_array($actual, $value)) $option_attributes['checked'] = 'checked';
             

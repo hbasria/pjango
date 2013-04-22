@@ -68,7 +68,14 @@ class Post extends BasePost
 	}
 	
 	public function get_file($mimeTypes = array()) {
-		$contentType = ContentType::get_for_model('Post',$this->post_type);
+		
+		if($this->post_type == 'Post'){
+			$contentType = ContentType::get_for_model('Post','Core');
+		}else {
+			$contentType = ContentType::get_for_model('Post',$this->post_type);
+		}
+		
+		
 		$file = Doctrine_Query::create()
 			->from('PjangoMedia o')
 			->where('o.content_type_id = ? AND o.object_id = ?', array($contentType->id, $this->id));
@@ -81,7 +88,12 @@ class Post extends BasePost
 	}	
 	
 	public function get_files($mimeTypes = array()) {
-		$contentType = ContentType::get_for_model('Post','Post');
+		if($this->post_type == 'Post'){
+			$contentType = ContentType::get_for_model('Post','Core');
+		}else {
+			$contentType = ContentType::get_for_model('Post',$this->post_type);
+		}
+		
 		$files = Doctrine_Query::create()
 			->from('PjangoMedia o')
 			->where('o.content_type_id = ? AND o.object_id = ?', array($contentType->id, $this->id));

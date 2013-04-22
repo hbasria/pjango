@@ -91,7 +91,8 @@ class Result_List_Tag extends H2o_Node {
         	$tableRowCells = array('<td class="toggleSelection"><input type="checkbox" name="row_id[]" value="'.$identifier.'" /></td>');
 
 			//$cl->row_actions tanımlıysa yerleştir
-			$rowActionTemplate = '<a href="%s" onClick="%s"><i class="icon-%s"></i>%s</a>';     
+			//<a href="#" class="btn mini green-stripe">View</a>
+			$rowActionTemplate = '<a href="%s" class="btn mini black" onClick="%s"><i class="icon-%s"></i>%s</a>';     
         	$rowActions = array();        
             if (is_array($cl->row_actions)){
                 foreach ($cl->row_actions as $rowAction) {
@@ -133,7 +134,7 @@ class Result_List_Tag extends H2o_Node {
         		$tableRowCells[] = sprintf($tableRowCellTemplate, $cellClass, $cellTxt);
         	}
         	
-        	$tableRowCells[] = sprintf('<td class="alignRight horizontalActions">%s</td>', implode('', $rowActions));
+        	$tableRowCells[] = sprintf('<td class="alignRight horizontalActions">%s</td>', implode('&nbsp;', $rowActions));
         	
         	
         	$tableRows[] = $tableRowCells;
@@ -423,7 +424,13 @@ class Admin_List_Filter_Tag extends H2o_Node {
 			
 			$selectedFilterKeyValue = false ;
 			foreach ($selecboxData as $selecboxDataItem) {
-			    $selecboxItemName = ucfirst($selecboxDataItem[2]);
+				$selecboxItemName = ucfirst($selecboxDataItem[2]);
+				
+				//nuberik bir değerse başına filterkey ekle
+				if (is_numeric($selecboxItemName)){
+					$selecboxItemName = $filterKeyStr.' '.$selecboxItemName;
+				}
+				
 			    $selecboxItemValue = $cl->get_query_string(array($filterKey=>$selecboxDataItem[1]));
 			    $selecboxDataArr[] = array('name'=>$selecboxItemName, 'value'=>$selecboxItemValue);
 
@@ -480,7 +487,7 @@ class Admin_List_Search_Tag extends H2o_Node {
 			$retVal = '<form action="" method="get" class="form-search pull-right">
 								<div class="input-append">
 									<input name="q" type="text" value="'.$value.'" class="search-query">
-									<button type="submit" class="btn">Search</button>
+									<button type="submit" class="btn">'.__('Search').'</button>
 								</div>			
 							</form>';
 			

@@ -89,22 +89,87 @@ class AdminViews {
 				$formData = $form->cleaned_data();
 				$formData['file_path'] = preg_replace('/(.*?)thumb\//i', SITE_PATH.'/', $formData['file_path']);
 				
-				$isFrame = strpos($this->description, '<iframe');
+				$isFrame = strpos($formData['description'], 'iframe');
 				//eğer descriptionda iframe varsa video embed kodu eklenmişse
 				if ($isFrame !== false) {
-					$fileType = 'video/embed';
+					$fileType = 'video/embed';					
 				}else {
-					if(is_file($formData['file_path'])){
-						$finfo = finfo_open(FILEINFO_MIME_TYPE);
-						$fileType = finfo_file($finfo, $formData['file_path']);
-						finfo_close($finfo);
+					if(is_file(SITE_PATH.$formData['file_path'])){						
+						if (function_exists('mime_content_type')) {
+							$fileType = mime_content_type(SITE_PATH.$formData['file_path']);
+						}else {
+							$mime_types = array(
+							
+									'txt' => 'text/plain',
+									'htm' => 'text/html',
+									'html' => 'text/html',
+									'php' => 'text/html',
+									'css' => 'text/css',
+									'js' => 'application/javascript',
+									'json' => 'application/json',
+									'xml' => 'application/xml',
+									'swf' => 'application/x-shockwave-flash',
+									'flv' => 'video/x-flv',
+							
+									// images
+									'png' => 'image/png',
+									'jpe' => 'image/jpeg',
+									'jpeg' => 'image/jpeg',
+									'jpg' => 'image/jpeg',
+									'gif' => 'image/gif',
+									'bmp' => 'image/bmp',
+									'ico' => 'image/vnd.microsoft.icon',
+									'tiff' => 'image/tiff',
+									'tif' => 'image/tiff',
+									'svg' => 'image/svg+xml',
+									'svgz' => 'image/svg+xml',
+							
+									// archives
+									'zip' => 'application/zip',
+									'rar' => 'application/x-rar-compressed',
+									'exe' => 'application/x-msdownload',
+									'msi' => 'application/x-msdownload',
+									'cab' => 'application/vnd.ms-cab-compressed',
+							
+									// audio/video
+									'mp3' => 'audio/mpeg',
+									'qt' => 'video/quicktime',
+									'mov' => 'video/quicktime',
+							
+									// adobe
+									'pdf' => 'application/pdf',
+									'psd' => 'image/vnd.adobe.photoshop',
+									'ai' => 'application/postscript',
+									'eps' => 'application/postscript',
+									'ps' => 'application/postscript',
+							
+									// ms office
+									'doc' => 'application/msword',
+									'rtf' => 'application/rtf',
+									'xls' => 'application/vnd.ms-excel',
+									'ppt' => 'application/vnd.ms-powerpoint',
+							
+									// open office
+									'odt' => 'application/vnd.oasis.opendocument.text',
+									'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+							);
+							
+							$ext = strtolower(array_pop(explode('.',SITE_PATH.$formData['file_path'])));
+							if (array_key_exists($ext, $mime_types)) {
+								$fileType = $mime_types[$ext];
+							}
+						}
 					}
 				}
+				
 				
 				if(!$imageObj) $imageObj = new PjangoMedia();							
 	
 				$imageObj->fromArray($formData);
-				$imageObj->file_type = $fileType;
+				
+				if($formData['file_type'] == 'auto'){
+					$imageObj->file_type = $fileType;
+				}								
 	
 				if ($imageObj->state() == Doctrine_Record::STATE_TCLEAN){
 					$imageObj->created_by = $request->user->id;
@@ -177,8 +242,8 @@ class AdminViews {
 	    $templateArr['cl'] = $cl;	    
 	    
 	    if(is_file(sprintf('%s/templates/%s/admin/change_list.html', SITE_PATH, strtolower($app_label)))){
-	    	$templateFile = sprintf('%s/admin/change_list.html', strtolower($app_label));	    	
-	    }else if(is_file(sprintf('%s/templates/%s/admin/change_list.html', APPLICATION_PATH, strtolower($app_label)))){
+	    	$templateFile = sprintf('%s/admin/change_list.html', strtolower($app_label));	    
+	    }else if(is_file(sprintf('%s/apps/%s/Templates/%s/admin/change_list.html', APPLICATION_PATH, $app_label, strtolower($app_label)))){	
 	    	$templateFile = sprintf('%s/admin/change_list.html', strtolower($app_label));
 	    }else {
 	    	$templateFile = 'admin/change_list.html';
@@ -233,11 +298,7 @@ class AdminViews {
 	            foreach ($metaData as $metaDataItem) {
 	                $formData[$metaDataItem->meta_key] = $metaDataItem->meta_value;
 	            }
-	            
-	            $templateArr['third_level_navigation'] = $modelAdmin->get_third_level_navigation('edit', $modelUrl, $id);
 	        }
-	    }else {
-	    	$templateArr['third_level_navigation'] = $modelAdmin->get_third_level_navigation('edit', $modelUrl);
 	    }
 	
 	    if ($request->POST){
@@ -278,8 +339,19 @@ class AdminViews {
 	
 	    if (!$form) $form = new $formClass($formData);
 	    $templateArr['addchange_form'] = $form;
+	    
+	    if(is_file(sprintf('%s/templates/%s/admin/addchange.html', SITE_PATH, strtolower($app_label)))){
+	    	$templateFile = sprintf('%s/admin/addchange.html', strtolower($app_label));
+	    }else if(is_file(sprintf('%s/apps/%s/Templates/%s/admin/addchange.html', APPLICATION_PATH, $app_label, strtolower($app_label)))){
+	    	$templateFile = sprintf('%s/admin/addchange.html', strtolower($app_label));
+	    }else {
+	    	$templateFile = 'admin/addchange.html';
+	    }	    
 	
-	    render_to_response('admin/addchange.html', $templateArr);
+
+	    
+	    $templateArr['third_level_navigation'] = $modelAdmin->get_third_level_navigation('edit', $modelUrl, $id);
+	    render_to_response($templateFile, $templateArr);
 	}		
 	
 	function app_delete($request, $app_label=false, $model=false, $id=false) {	

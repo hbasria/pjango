@@ -47,8 +47,11 @@ class DateTimeField extends TextField
     public function import_value($value)
     {
     	$value = parent::import_value($value);
-    	$simpleDate = \Pjango\Util\SimpleDate::parse($value, pjango_ini_get('DATETIME_FORMAT'));
-    	return $simpleDate->toString();
+    	if(strlen(trim($value))>0){
+    		$simpleDate = \Pjango\Util\SimpleDate::parse($value, pjango_ini_get('DATETIME_FORMAT'));
+    		return $simpleDate->toString();
+    	}
+    	return null;
     }
     
     public function export_value($value)

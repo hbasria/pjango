@@ -664,7 +664,7 @@ class PhpThumb {
 			// try to correct the permissions
 			if ($this->options['correctPermissions'] === true)
 			{
-				@chmod(dirname($fileName), 0777);
+				@chmod(dirname($fileName), 0755);
 				
 				// throw an exception if not writeable
 				if (!is_writeable(dirname($fileName)))

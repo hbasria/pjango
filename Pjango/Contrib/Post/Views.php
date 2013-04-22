@@ -15,7 +15,7 @@ class PostViews {
 			->from('Post o')
 			->where('o.site_id = ? AND o.post_type = ? AND o.status = ?', array(SITE_ID, Post::TYPE_POST, Post::STATUS_PUBLISHED));
 		
-		$cl = new ChangeList($q);
+		$cl = new ChangeList('Post','Post',$q);
 		$templateArr['cl'] = $cl;		
 				
 		render_to_response('post/index.html', $templateArr);
@@ -169,13 +169,16 @@ class PostViews {
         $templateArr['addchange_form'] = $form;
         $templateArr['taxonomy'] = $taxonomy;
         
-        $templateFileName = sprintf('%s/admin/addchange.html', strtolower($taxonomy));
         
-        if (!file_exists(APPLICATION_PATH.'/templates/'.$templateFileName)) {
-        	$templateFileName = 'admin/addchange.html';
+        if(is_file(sprintf('%s/templates/%s/admin/addchange.html', SITE_PATH, strtolower($taxonomy)))){
+        	$templateFile = sprintf('%s/admin/addchange.html', strtolower($taxonomy));
+        }else if(is_file(sprintf('%s/apps/%s/Templates/%s/admin/addchange.html', APPLICATION_PATH, $taxonomy, strtolower($taxonomy)))){
+        	$templateFile = sprintf('%s/admin/addchange.html', strtolower($taxonomy));
+        }else {
+        	$templateFile = 'admin/addchange.html';
         }        
     	
-    	render_to_response($templateFileName, $templateArr);
+    	render_to_response($templateFile, $templateArr);
 	}
 	
     function admin_delete($request, $taxonomy = 'Post',$id) {

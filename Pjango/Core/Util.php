@@ -115,3 +115,7 @@ function slugify($text){
 	return $text;
 }
 
+function clear_quotes($value){
+	$value = str_replace(array('"',"'"), '', $value);
+	return $value;
+}

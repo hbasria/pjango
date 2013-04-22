@@ -144,6 +144,34 @@ class AuthViews {
 	    $templateArr['addchange_form'] = $form;
 	    render_to_response('admin/addchange.html', $templateArr);
 	}
+	
+	function admin_user_delete($request, $id=false) {
+		$modelObj = Doctrine_Query::create()
+			->from('User o')
+			->leftJoin('o.Permissions')
+			->leftJoin('o.Groups')
+			->where('o.site_id = ? AND o.id = ?', array(SITE_ID, $id))
+			->fetchOne();
+	
+		if($modelObj){
+			$conn = Doctrine_Manager::connection();
+			
+			try {
+				$conn->beginTransaction();
+				$modelObj->unlink('Permissions');
+	            $modelObj->unlink('Groups');
+				$modelObj->save();
+				$modelObj->delete();
+				$conn->commit();
+				Messages::Info(__('Records deleted.'));
+			} catch (Exception $e) {
+				$conn->rollback();
+				Messages::Error($e->getMessage());
+			}
+		}
+	
+		HttpResponseRedirect('/admin/Auth/User/');
+	}	
 
 	function admin_group_addchange($request, $id = false) {
 	    $templateArr = array('current_admin_menu'=>'Auth',

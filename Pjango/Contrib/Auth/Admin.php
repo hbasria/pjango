@@ -12,17 +12,15 @@ class UserAdmin extends ModelAdmin {
 		$this->list_display_links = array('username');
 		$this->row_actions = array('edit', 'delete');
 		$this->search_fields = array('username', 'displayname', 'email');
-		
-		$this->list_filter = array('is_staff', 'is_active');
 
 		$user = User::get_current();
 		if($user->is_active && $user->is_superuser){
 			$this->admin_menu = array('Auth', pjango_gettext('Auth'), '/admin/Auth/User/',
-			    array('Auth', pjango_gettext('Auth'), '/admin/Auth/User/',
+			    //array('Auth', pjango_gettext('Auth'), '/admin/Auth/User/',
 			        array('User', pjango_gettext('Users'), '/admin/Auth/User/'),
 			        array('Group', pjango_gettext('Groups'), '/admin/Auth/Group/'),
 			        array('Permission', pjango_gettext('Permissions'), '/admin/Auth/Permission/')
-			    ),
+			    //),
 			);
 		}
 	}

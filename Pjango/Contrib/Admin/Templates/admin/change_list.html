@@ -4,17 +4,19 @@
 {% block extrahead %}{% endblock %}
 
 {% block breadcrumb %}
-    <li><a href="{{ SITE_URL }}/admin/{{ current_admin_menu }}/{{ current_admin_submenu }}/">{{ current_admin_menu }}</a> <span class="divider">/</span></li>
-    <li><a href="{{ SITE_URL }}/admin/{{ current_admin_menu }}/{{ current_admin_submenu2 }}/">{{ current_admin_submenu2 }}</a> <span class="divider">/</span></li>
+    <li><a href="{{ SITE_URL }}/admin/{{ current_admin_menu }}/{{ current_admin_submenu }}/">{% trans current_admin_menu %}</a> <span class="divider">/</span></li>
+    <li><a href="{{ SITE_URL }}/admin/{{ current_admin_menu }}/{{ current_admin_submenu2 }}/">{% trans current_admin_submenu2 %}</a> <span class="divider">/</span></li>
     <li class="active">{{ title }}</li>     
 {% endblock %}
 
 {% block third_level_navigation %}
-<ul class="nav nav-tabs">
-    {% for navigation_item in third_level_navigation %}
-        <li class="{{ navigation_item.class }}"><a href="{{ navigation_item.url }}">{{ navigation_item.name }}</a></li>
-    {% endfor %}
-</ul>
+	{% if third_level_navigation %}
+		<ul class="nav nav-tabs">
+		    {% for navigation_item in third_level_navigation %}
+		        <li class="{{ navigation_item.class }}"><a href="{{ navigation_item.url }}">{{ navigation_item.name }}</a></li>
+		    {% endfor %}
+		</ul>
+	{% endif %}
 {% endblock %}
 
 {% block content %}

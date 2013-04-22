@@ -139,8 +139,8 @@ abstract class PhormField
      * @return string the HTML help text paragraph
      **/
     public function help_text()
-    {
-        return sprintf('<span class="help-inline">%s</span>', htmlentities($this->help_text, ENT_QUOTES, 'UTF-8' ));
+    {    
+        return sprintf('<span class="help-inline">%s</span>', $this->help_text);
     }
 
     /**

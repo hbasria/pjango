@@ -18,9 +18,10 @@ function array2xml($array, $xml = false){
 
 class RestWSViews {
 	function ws_index($request) {
+		$resArr = array();
 // 		$tmp = $_SERVER;
-// 		$tmp['DATA'] = $request->_request_data;
-// 		print_r($tmp);
+ 		$resArr['REQUEST'] = $request->_request_data;
+ 		print_r($resArr);
 	}
 	
 	function ws_model_id($request, $model=false, $id=false ) {
@@ -89,31 +90,46 @@ class RestWSViews {
 					
 	}	
 	
-	function ws_model_method($request, $model=false, $method=false, $id=false ) {
-		$responseType = isset($_GET['responsetype']) ? $_GET['responsetype'] : 'xml';
+	function ws_model_method($request, $model=false, $method=false) {
+		
+		$arrRequestUri = parse_url($_SERVER["REQUEST_URI"]);
+		$path = $arrRequestUri['path'];
+		
+		if(substr($path, -1) == '/') $path = substr($path, 0, -1);
+		if(substr($path, -5) == '.json') {
+			$responseType = 'json';
+		}else if(substr($path, -4) == '.xml') {
+			$responseType = 'xml';
+		}else {
+			if (isset($_GET['responsetype']) && $_GET['responsetype'] == 'json') {
+				$responseType = 'json';				
+			}else {
+				$responseType = 'xml';
+			}			
+		}
+		
 		$resArr = array(); 
 		
-		if (class_exists($model)){			
-			if (method_exists($model, $method)){				
+		try {
+			//if(!array_key_exists($model, $arrModelMethod)) throw new Exception('Request not found1', 404);
+			//if(!in_array($method, $arrModelMethod[$model])) throw new Exception('Request not found2', 404);
+			if(!is_callable($model.'::'.$method)) throw new Exception('Request not found', 404);
 				
-				try {
-					$resArr['results'] = call_user_func_array(array($model, $method), array($id));
-				} catch (Exception $e) {
-					$resArr['error']['code'] = $e->getCode();
-					$resArr['error']['message'] = $e->getMessage();
-				}				
+			//$apiKey = Doctrine_Query::create()
+			//	->from('Settings o')
+			//	->where('o.category = ? AND o.site_id = ? AND o.name = ? AND o.value = ?', array('GENERAL', SITE_ID, 'API_KEY', $_GET['key']))
+			//	->fetchOne();
 				
-				if ($resArr && count($resArr)>0){
-					$resArr['message'] = count($resArr).' records found.';					
-				}else {
-					$resArr['message'] = 'no records found.';
-				}				
-			}else {
-				$resArr['error']['message'] = $method.' does not exist.';
-			}
-		}else {
-			$resArr['error']['message'] = $model.' does not exist.'; 
-		}
+			//if(!$apiKey) throw new Exception('API Key not found', 401);
+			//if(strlen($apiKey->value)<30) throw new Exception('API Key not found', 401);
+				
+			$resArr['results'] = call_user_func_array(array($model, $method), array());
+				
+				
+		} catch (Exception $e) {
+			$resArr['error']['code'] = $e->getCode();
+			$resArr['error']['message'] = $e->getMessage();
+		}		
 		
 		header('Cache-Control: no-cache, must-revalidate');
 		header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');		

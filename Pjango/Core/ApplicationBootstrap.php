@@ -194,6 +194,8 @@ class ApplicationBootstrap {
         
         $languageCode = pjango_ini_get('LANGUAGE_CODE');
         
+        $databases = pjango_ini_get('DATABASES');
+        
         foreach ($installedApps as $app) {
             
             $appPath = reverse($app);            
@@ -207,7 +209,9 @@ class ApplicationBootstrap {
              
                 if(is_dir($appPath.'/Models')){
                     $_installedApps[$app]['model_path'] = $appPath.'/Models';
-                    $this->_loadedModels[$app] = \Doctrine::loadModels($appPath.'/Models');
+                    if($databases){
+                    	$this->_loadedModels[$app] = \Doctrine::loadModels($appPath.'/Models');
+                    }                    
                 }
 
                 if(is_dir($appPath.'/Templates')){
@@ -269,6 +273,9 @@ class ApplicationBootstrap {
     protected function init_settings(){
         if(pjango_ini_get('DATABASES')){
             try {
+            	
+            	$conn = \Doctrine_Manager::connection();
+            	
     	        $settings = \Doctrine_Query::create()
                     ->from('Settings s')
                     ->where('s.site_id = ?', SITE_ID)
@@ -278,7 +285,7 @@ class ApplicationBootstrap {
         	            pjango_ini_set($setting_item->name, $setting_item->value);
         	        }
     	  
-    	    } catch (Exception $e) {}
+    	    } catch (\Doctrine_Connection_Mysql_Exception $e) {}
 	    }
 	}
 

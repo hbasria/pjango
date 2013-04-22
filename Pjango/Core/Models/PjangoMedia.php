@@ -46,9 +46,9 @@ class PjangoMedia extends BasePjangoMedia
 	}	
 		
     public function get_thumb_url($size = 'original') {
-    	$youtubeEmbed = strpos($this->description, '<iframe');
+    	$isEmbed = strpos($this->description, '<iframe');
     	
-    	if ($youtubeEmbed === false) {
+    	if ($isEmbed === false) {
     		if(strlen($this->file_path)>0){
     			$url = preg_replace('/(.*?)media\//i', '/media/', $this->file_path);
     			$urlArr = explode('/', pjango_ini_get('SITE_URL').$url);

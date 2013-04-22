@@ -35,10 +35,10 @@ class CoreViews {
         $fileInfo = pathinfo($originalFile);
         
         if(!is_dir($cacheFolder)){
-        	@mkdir($cacheFolder, 0744, true);
+        	@mkdir($cacheFolder, 0755, true);
         }        
         
-        if (is_file(sprintf('%s/media/admn/img/icons/256/%s.png', APPLICATION_PATH, $fileInfo['extension']))){        	
+        if (@is_file(sprintf('%s/media/admn/img/icons/256/%s.png', APPLICATION_PATH, $fileInfo['extension']))){        	
         	readfile(sprintf('%s/media/admn/img/icons/256/%s.png', APPLICATION_PATH, $fileInfo['extension']));        	
         }else {
         	if (!is_file($cacheFile)){

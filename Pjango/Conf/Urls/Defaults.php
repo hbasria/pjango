@@ -86,6 +86,12 @@ function is_mobile() {
 	return false;
 }
 
+function is_popup() {
+	if (isset($_GET['popup'])){
+		if($_GET['popup'] == '1' || $_GET['popup'] == 'true') return true;
+	}	
+	return false;
+}
 
 //responseType
 //    TYPE_JSARRAY
@@ -118,9 +124,18 @@ function render_to_response($templateFile, $templateArr, $isReturn = false){
          
         $templateArr['request'] = $_REQUEST;
         $templateArr['request']['is_mobile'] = is_mobile();
-        
-        echo $template->render($templateArr);
-    }
+        $templateArr['is_popup'] = is_popup();
 
-     
+        echo $template->render($templateArr);
+    }     
+}
+
+function render_to_string($templateFile, $templateArr){
+	$templateArr = array_merge($templateArr, $GLOBALS['SETTINGS']);
+
+	$templateArr['user'] = User::get_current();
+	$h2oConfig = pjango_ini_get('H2O_CONFIG');
+
+	$template = new H2o($templateFile, $h2oConfig);
+	return $template->render($templateArr);	
 }

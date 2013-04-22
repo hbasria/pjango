@@ -119,6 +119,7 @@ class User extends BaseUser
         if(is_array($_SESSION['user']) && isset($_SESSION['user']['id'])){
             $user = Doctrine_Query::create()
                 ->from('User u')
+                ->leftJoin('u.Groups g')
                 ->addWhere('u.id = ?', $_SESSION['user']['id'])
                 ->fetchOne();
             $_SESSION['user'] = serialize($user);

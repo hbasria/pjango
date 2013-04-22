@@ -8,7 +8,7 @@
 	        "email": "hbasria@gmail.com",
 	        "role": "Developer"
 	    }
-	]
+	],
     "require": {
         "doctrine/doctrine1": "dev-master",
         "twig/twig": "v1.12.3"

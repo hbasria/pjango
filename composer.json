@@ -1,0 +1,21 @@
+{
+    "name": "pjango/pjango",
+    "description": "Php Web Framework",
+    "keywords": ["php","framework"],
+	"authors": [
+	    {
+	        "name": "Hasan Basri Ates",
+	        "email": "hbasria@gmail.com",
+	        "role": "Developer"
+	    }
+	]
+    "require": {
+        "doctrine/doctrine1": "dev-master",
+        "twig/twig": "v1.12.3"
+    },
+    "autoload": {
+        "psr-0": {
+            "Pjango\\": ""
+        }
+    }
+}

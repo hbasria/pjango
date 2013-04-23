@@ -10,7 +10,7 @@
 	    }
 	],
     "require": {
-        "doctrine/doctrine1": "dev-master",
+        "doctrine/orm": "2.3.3",
         "twig/twig": "v1.12.3"
     },
     "autoload": {
